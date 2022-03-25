@@ -1,6 +1,6 @@
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
-#include "FWCore/Framework/interface/EDAnalyzer.h"
+#include "FWCore/Framework/interface/one/EDAnalyzer.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 
 #include "FWCore/Framework/interface/Event.h"
@@ -36,13 +36,15 @@
 
 #include <string>
 
-class EGRegTreeMaker : public edm::EDAnalyzer {
+class EGRegTreeMaker : public edm::one::EDAnalyzer<edm::one::SharedResources> {
 
 private:
   EGRegTreeStruct egRegTreeData_;
   TTree* egRegTree_;
   std::string treeName_;
 
+  edm::ESGetToken<CaloTopology,CaloTopologyRecord> caloTopologyToken_;
+  edm::ESGetToken<EcalChannelStatus,EcalChannelStatusRcd> channelStatusToken_;
   edm::EDGetTokenT<reco::VertexCollection>  verticesToken_;
   edm::EDGetTokenT<double> rhoToken_;
   edm::EDGetTokenT<reco::GenParticleCollection> genPartsToken_;
@@ -89,7 +91,9 @@ private:
 
 EGRegTreeMaker::EGRegTreeMaker(const edm::ParameterSet& iPara):
   egRegTree_(nullptr),
-  treeName_("egRegTree")
+  treeName_("egRegTree"),
+  caloTopologyToken_(esConsumes()),
+  channelStatusToken_(esConsumes())
 {
   if(iPara.exists("treeName")){
     treeName_ = iPara.getParameter<std::string>("treeName");
@@ -202,11 +206,9 @@ void EGRegTreeMaker::analyze(const edm::Event& iEvent,const edm::EventSetup& iSe
   auto phosHandle = getHandle(iEvent,phosToken_);
   auto phoAltHandles = getHandle(iEvent,phoAltTokens_);
   auto puSumHandle = getHandle(iEvent,puSumToken_);
-  edm::ESHandle<CaloTopology> caloTopoHandle;
-  iSetup.get<CaloTopologyRecord>().get(caloTopoHandle);
-  edm::ESHandle<EcalChannelStatus> chanStatusHandle;
-  iSetup.get<EcalChannelStatusRcd>().get(chanStatusHandle);
-
+  edm::ESHandle<CaloTopology> caloTopoHandle = iSetup.getHandle(caloTopologyToken_);
+  edm::ESHandle<EcalChannelStatus> chanStatusHandle = iSetup.getHandle(channelStatusToken_);
+  
   int nrVert = verticesHandle->size();
   float nrPUInt = -1;
   float nrPUIntTrue = -1;

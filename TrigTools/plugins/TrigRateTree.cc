@@ -1,4 +1,4 @@
-#include "FWCore/Framework/interface/EDAnalyzer.h"
+#include "FWCore/Framework/interface/one/EDAnalyzer.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EventSetup.h"
@@ -17,7 +17,7 @@
 #include "TTree.h"
 #include <iostream>
 #include <numeric>
-class TrigRateTree : public edm::EDAnalyzer {
+class TrigRateTree : public edm::one::EDAnalyzer<edm::one::SharedResources>  {
   edm::EDGetTokenT<edm::MergeableCounter> nrEventsRunToken_;
   edm::EDGetTokenT<edm::MergeableCounter> nrEventsRunPostPUFilterToken_;
   edm::EDGetTokenT<edm::TriggerResults> trigResultsToken_;
@@ -56,11 +56,11 @@ public:
   }
 
   
-  void analyze(const edm::Event& event,const edm::EventSetup& setup) override;
+  void analyze(const edm::Event& event,const edm::EventSetup& setup);
 
-  void beginRun(const edm::Run& run,const edm::EventSetup& setup ) override{}
+  void beginRun(const edm::Run& run,const edm::EventSetup& setup ){}
    
-  void endRun(const edm::Run& run,const edm::EventSetup& setup ) override{
+  void endRun(const edm::Run& run,const edm::EventSetup& setup ){
     edm::Handle<edm::MergeableCounter> nrEventsHandle;
     run.getByToken(nrEventsRunToken_,nrEventsHandle);
     edm::Handle<edm::MergeableCounter> nrEventsPostPUFilterHandle;
@@ -69,7 +69,7 @@ public:
     nrEventsRunPostPUFilterSum_+=nrEventsPostPUFilterHandle->value; 
   }
  
-  void endJob()override;
+  void endJob();
 
   bool checkPUFilter(const edm::Event& event);
 

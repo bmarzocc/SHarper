@@ -1,6 +1,6 @@
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
-#include "FWCore/Framework/interface/EDAnalyzer.h"
+#include "FWCore/Framework/interface/one/EDAnalyzer.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 
 #include "SHarper/SHNtupliser/interface/SHEvent.hh"
@@ -19,7 +19,7 @@
 
 #include <string>
 
-class TrigNtupMaker : public edm::EDAnalyzer {
+class TrigNtupMaker : public edm::one::EDAnalyzer<edm::one::SharedResources> {
 
 private:
   heep::EventHelper evtHelper_; //this is our magic class where all the nastyness is contained

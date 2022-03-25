@@ -73,12 +73,8 @@ process.egRegTreeMaker = cms.EDAnalyzer("EGRegTreeMaker",
 
 process.load("SHarper.TrigNtup.rePFSuperCluster_cff")
 
-#import Geometry.ForwardGeometry.CastorGeometryDBReader_cfi
-#castorGeometry = Geometry.ForwardGeometry.CastorGeometryDBReader_cfi.CastorGeometryFromDBEP.clone()
-#es_prefer_castor = cms.ESPrefer("CastorGeometryFromDBEP","castorGeometry")
-
 from Geometry.CaloEventSetup.CaloGeometryBuilder_cfi import *
-CaloGeometryBuilder.SelectedCalos = cms.vstring('HCAL', 'ZDC', 'EcalBarrel', 'EcalEndcap', 'EcalPreshower', 'TOWER') 
+CaloGeometryBuilder.SelectedCalos = ['HCAL', 'ZDC', 'EcalBarrel', 'EcalEndcap', 'EcalPreshower', 'TOWER'] 
 
 process.p = cms.Path(process.rePFSuperClusterThresSeq*process.egRegTreeMaker)
 process.AODSIMoutput = cms.OutputModule("PoolOutputModule",

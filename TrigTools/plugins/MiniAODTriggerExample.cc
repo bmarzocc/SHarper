@@ -1,7 +1,7 @@
 #ifndef SHARPER_TRIGTOOLS_MINIAODTRIGGEREXAMPLE
 #define SHARPER_TRIGTOOLS_MINIAODTRIGGEREXAMPLE
 
-#include "FWCore/Framework/interface/EDAnalyzer.h"
+#include "FWCore/Framework/interface/one/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
@@ -103,7 +103,7 @@ namespace{
 }
 
 
-class MiniAODTriggerExample : public edm::EDAnalyzer {
+class MiniAODTriggerExample : public edm::one::EDAnalyzer<edm::one::SharedResources> {
 private:
 
   edm::InputTag trigObjsTag_;

@@ -33,5 +33,5 @@ particleFlowRecHitECAL.producers[1].qualityTests = cms.VPSet(
 
 particleFlowSuperClusterECAL.ESAssociation = cms.InputTag("emptyEEESAssoc")
 particleFlowSuperClusterECAL.ESAssociation.PFClusters = cms.InputTag("particleFlowClusterECALUncorrected"),
-rePFSuperClusterTask = cms.Task(particleFlowRecHitECAL*particleFlowClusterECALUncorrected*emptyEEESAssoc*particleFlowSuperClusterECA)
+rePFSuperClusterTask = cms.Task(particleFlowRecHitECAL*particleFlowClusterECALUncorrected*emptyEEESAssoc*particleFlowSuperClusterECAL)
 rePFSuperClusterSeq = cms.Sequence(rePFSuperClusterTask)
