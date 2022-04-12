@@ -1,5 +1,5 @@
 
-#include "FWCore/Framework/interface/EDAnalyzer.h"
+#include "FWCore/Framework/interface/one/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Utilities/interface/InputTag.h"
@@ -13,7 +13,7 @@
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
 #include "TTree.h"
 
-class AODVsMiniAODTracksComp : public edm::EDAnalyzer {
+class AODVsMiniAODTracksComp : public edm::one::EDAnalyzer<edm::one::SharedResources> {
 
 private:
 
@@ -295,5 +295,6 @@ passCuts(const reco::Track& trk)
 }
 
 
-
+#include "FWCore/PluginManager/interface/ModuleDef.h"
+#include "FWCore/Framework/interface/MakerMacros.h"
 DEFINE_FWK_MODULE(AODVsMiniAODTracksComp);

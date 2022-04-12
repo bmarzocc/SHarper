@@ -8,6 +8,11 @@
 // 
 //Author: Sam Harper
 
+#include "Geometry/CaloGeometry/interface/CaloGeometry.h"
+#include "Geometry/CaloGeometry/interface/CaloSubdetectorGeometry.h"
+#include "Geometry/CaloTopology/interface/CaloTowerConstituentsMap.h"
+#include "Geometry/Records/interface/CaloGeometryRecord.h"
+
 #include "SHarper/SHNtupliser/interface/SHCaloCellGeom.hh"
 
 class CaloGeometry;
@@ -23,6 +28,8 @@ namespace edm{
 class SHGeomFiller{
   
 private:
+  edm::ESGetToken<CaloGeometry, CaloGeometryRecord> caloGeometryToken_;
+  edm::ESGetToken<CaloTowerConstituentsMap, CaloGeometryRecord> caloTCMap_;
   const CaloGeometry* calGeometry_;
   const CaloTowerConstituentsMap* calTowersConstits_;
   

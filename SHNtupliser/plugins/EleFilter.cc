@@ -1,5 +1,5 @@
  
-#include "FWCore/Framework/interface/EDProducer.h"
+#include "FWCore/Framework/interface/stream/EDProducer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Utilities/interface/InputTag.h"
@@ -17,7 +17,7 @@
 #include "TTree.h"
 
 
-class EleFilter : public edm::EDProducer {
+class EleFilter : public edm::stream::EDProducer<> {
 
 private:
  
@@ -27,7 +27,7 @@ public:
   explicit EleFilter(const edm::ParameterSet& para);
   ~EleFilter(){}
   
-  virtual void produce(edm::Event& event,const edm::EventSetup& setup) override;
+  virtual void produce(edm::Event& event,const edm::EventSetup& setup);
 };
 
 EleFilter::EleFilter(const edm::ParameterSet& para)
@@ -50,7 +50,6 @@ void EleFilter::produce(edm::Event& event,const edm::EventSetup& setup)
   event.put(std::move(newEles));
 }
 
-
-
-
+#include "FWCore/PluginManager/interface/ModuleDef.h"
+#include "FWCore/Framework/interface/MakerMacros.h"
 DEFINE_FWK_MODULE(EleFilter);

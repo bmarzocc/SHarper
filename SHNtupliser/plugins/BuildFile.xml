@@ -1,5 +1,41 @@
-<export>
-</export>
-<library   name="SHarperSHNtupliser_plugins" file="SHNtupliser.cc,VertexFilter.cc,EGammaFilter.cc,PDFTreeMaker.cc,DeCalibEcalRecHitProducer.cc,SHL1Ntupliser.cc,MCTruthFilter.cc,MCEMuTruthFilter.cc,PFElePassingChecker.cc,CrossSecDumper.cc,BXRecordProducer.cc,TrigRateAna.cc,EleFilter.cc,NrInputEventsStorer.cc,NrInputEventsReader.cc,AODVsMiniAODTracksComp.cc,PatEleCTFTrkTester.cc,EGammaDebugger.cc,EGammaAODDebugger.cc,DiEleGenFilter.cc,DumpRegGBRForest.cc,EGammaLowMassTPFilter.cc,DumpPFRecHitThres.cc,MCPtFilter.cc,DumpEcalChanStatus.cc,EmptyESAssocProducer.cc,ECALPFClusterWithDummyCorrProducer.cc,EcalCandFilter.cc">
-  <use   name="SHarper/SHNtupliser"/>
-</library>
+<use   name="CommonTools/UtilAlgos"/>
+<use   name="FWCore/Framework"/>
+<use   name="FWCore/PluginManager"/>
+<use   name="FWCore/ParameterSet"/>
+<use   name="FWCore/Utilities"/>
+<use   name="FWCore/ServiceRegistry"/>
+<use   name="DataFormats/Common"/>
+<use   name="DataFormats/PatCandidates"/>
+<use   name="DataFormats/TrackReco"/>
+<use   name="DataFormats/ParticleFlowReco"/>
+<use   name="DataFormats/ParticleFlowCandidate"/>
+<use   name="DataFormats/HepMCCandidate"/>
+<use   name="DataFormats/EcalRecHit"/>
+<use   name="DataFormats/DetId"/>
+<use   name="DataFormats/Provenance"/>
+<use   name="DataFormats/CaloTowers"/>
+<use   name="DataFormats/EgammaCandidates"/>
+<use   name="DataFormats/EgammaReco"/>
+<use   name="DataFormats/VertexReco"/>
+<use   name="DataFormats/RecoCandidate"/>
+<use   name="DataFormats/L1Trigger"/>
+<use   name="CondFormats/GBRForest"/>
+<use   name="CondFormats/DataRecord"/>
+<use   name="CondFormats/EcalObjects"/>
+<use   name="CondFormats/L1TObjects"/>
+<use   name="DataFormats/L1GlobalTrigger"/>
+<use   name="DataFormats/HLTReco"/>
+<use   name="HLTrigger/HLTcore"/>
+<use   name="SimDataFormats/PileupSummaryInfo"/>
+<use   name="CalibCalorimetry/EcalLaserCorrection"/>
+<use   name="SimDataFormats/GeneratorProducts"/>
+<use   name="RecoEgamma/EgammaIsolationAlgos"/>
+<use   name="SHarper/SHNtupliser"/>
+<use   name="SHarper/TrigTools"/>
+<use   name="rootcore"/>
+<use   name="rootrflx"/>
+<use   name="roofit"/>
+<use   name="roofitcore"/>
+<use   name="boost_python"/>
+<flags EDM_PLUGIN="1"/>
+<!-- Flags CXXFLAGS="-ggdb"/ -->

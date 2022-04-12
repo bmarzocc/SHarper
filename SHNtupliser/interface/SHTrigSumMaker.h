@@ -9,6 +9,11 @@
 #include "DataFormats/PatCandidates/interface/TriggerObjectStandAlone.h"
 #include "FWCore/Framework/interface/GenericHandle.h"
 
+#include "CondFormats/DataRecord/interface/L1TUtmTriggerMenuRcd.h"
+#include "CondFormats/L1TObjects/interface/L1TUtmTriggerMenu.h"
+#include "CondFormats/DataRecord/interface/L1TGlobalPrescalesVetosRcd.h"
+#include "CondFormats/L1TObjects/interface/L1TGlobalPrescalesVetos.h"
+
 #include "SHarper/SHNtupliser/interface/TrigMenuMgr.hh"
 
 namespace edm{
@@ -162,6 +167,9 @@ private:
   static std::vector<std::string> splitL1SeedExpr_(const std::string& l1SeedExpr);
   //converts vector[columnNr][bitNr] -> vector[columnNr] for a given bitNr 
   static std::vector<unsigned int> getSeedPreScales(size_t bitNr,const std::vector<std::vector<int> >& psTbl);
+
+  edm::ESGetToken<L1TUtmTriggerMenu, L1TUtmTriggerMenuRcd> l1tMenuToken_;
+  edm::ESGetToken<L1TGlobalPrescalesVetos, L1TGlobalPrescalesVetosRcd> l1tGtPrescalesVetosToken_;
 
 };
   

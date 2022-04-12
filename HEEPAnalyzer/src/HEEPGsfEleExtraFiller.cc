@@ -46,7 +46,7 @@ void heep::GsfEleExtraFiller::getEvtContent(const edm::Event& iEvent,const edm::
   iEvent.getByToken(eeRecHitToken_,eeRecHitHandle_);
   iEvent.getByToken(beamSpotToken_,beamSpotHandle_);
   iEvent.getByToken(trkToken_,trkHandle_);
-  iSetup.get<CaloTopologyRecord>().get(caloTopoHandle_);
+  caloTopoHandle_ = iSetup.getHandle(caloTopoToken_); 
 
 }
   

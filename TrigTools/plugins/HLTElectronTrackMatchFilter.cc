@@ -288,14 +288,14 @@ void HLTElectronTrackMatchFilter::EventSetupData::setup(const edm::EventSetup& i
   if (cacheIDMagField_!=iSetup.get<IdealMagneticFieldRecord>().cacheIdentifier()){
     updateField = true;
     cacheIDMagField_=iSetup.get<IdealMagneticFieldRecord>().cacheIdentifier();
-    iSetup.get<IdealMagneticFieldRecord>().get(magField_);
+    magField_ = iSetup.getHandle(magFieldToken_);
   }
   
   bool updateGeometry(false);
   if (cacheIDTDGeom_!=iSetup.get<TrackerDigiGeometryRecord>().cacheIdentifier()){
     updateGeometry = true;
     cacheIDTDGeom_=iSetup.get<TrackerDigiGeometryRecord>().cacheIdentifier();
-    iSetup.get<TrackerDigiGeometryRecord>().get(trackerHandle_);
+    trackerHandle_ = iSetup.getHandle(tkGeoToken_);
   }
   
   if ( updateField || updateGeometry || !mtsTransform_ ) {

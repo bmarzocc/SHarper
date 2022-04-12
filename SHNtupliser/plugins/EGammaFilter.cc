@@ -1,5 +1,5 @@
 
-#include "FWCore/Framework/interface/EDFilter.h"
+#include "FWCore/Framework/interface/stream/EDFilter.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Utilities/interface/EDGetToken.h"
@@ -18,7 +18,7 @@
 #include "TTree.h"
 
 
-class EGammaFilter : public edm::EDFilter {
+class EGammaFilter : public edm::stream::EDFilter<> {
 
 private:
   edm::EDGetTokenT<edm::View<reco::Photon> > phoTag_;
@@ -194,5 +194,6 @@ bool EGammaFilter::passSC(edm::Event& event)const
   
 }
 
-
+#include "FWCore/PluginManager/interface/ModuleDef.h"
+#include "FWCore/Framework/interface/MakerMacros.h"
 DEFINE_FWK_MODULE(EGammaFilter);

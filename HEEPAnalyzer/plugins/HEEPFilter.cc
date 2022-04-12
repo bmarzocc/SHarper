@@ -1,6 +1,6 @@
 
 
-#include "FWCore/Framework/interface/EDFilter.h"
+#include "FWCore/Framework/interface/stream/EDFilter.h"
 
 #include "SHarper/HEEPAnalyzer/interface/HEEPEventHelper.h"
 #include "SHarper/HEEPAnalyzer/interface/HEEPEvent.h"
@@ -12,7 +12,7 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 
-class HEEPFilter : public edm::EDFilter {
+class HEEPFilter : public edm::stream::EDFilter<> {
 
 private:
   heep::EventHelper evtHelper_; //this is our magic class where all the nastyness is contained

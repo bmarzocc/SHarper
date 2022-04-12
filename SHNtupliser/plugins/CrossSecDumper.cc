@@ -1,5 +1,5 @@
 
-#include "FWCore/Framework/interface/EDAnalyzer.h"
+#include "FWCore/Framework/interface/one/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h" 
 #include "FWCore/Framework/interface/Run.h" 
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
@@ -13,7 +13,7 @@
 #include "TTree.h"
 
 
-class CrossSecDumper : public edm::EDAnalyzer {
+class CrossSecDumper : public edm::one::EDAnalyzer<edm::one::SharedResources> {
 
 private:
 
@@ -59,5 +59,6 @@ void CrossSecDumper::endRun(edm::Run const& iRun, edm::EventSetup const&)
 }  
 
 
-
+#include "FWCore/PluginManager/interface/ModuleDef.h"
+#include "FWCore/Framework/interface/MakerMacros.h"
 DEFINE_FWK_MODULE(CrossSecDumper);

@@ -192,17 +192,15 @@ void heep::EventHelper::setHandles(const edm::Event& event,const edm::EventSetup
   setHandles(event,extraJetTags_,handles.extraJets);
   setHandles(event,extraMETTags_,handles.extraMETs);
   
-
-  setup.get<CaloGeometryRecord>().get(handles.caloGeom);
-  setup.get<CaloTopologyRecord>().get(handles.caloTopology);
-  //setup.get<L1GtTriggerMenuRcd>().get(handles.l1Menu);
-  //setup.get<TrackerDigiGeometryRecord>().get(handles.trackGeom);
-  setup.get<IdealMagneticFieldRecord>().get(handles.bField);
-  setup.get<EcalADCToGeVConstantRcd>().get(handles.ecalADCToGeV);
-  setup.get<EcalLaserDbRecord>().get(handles.ecalLaser);
-  setup.get<EcalIntercalibConstantsRcd>().get(handles.ecalInterCalib);
+  handles.caloGeom = setup.getHandle(caloGeometryToken_);
+  handles.caloTopology = setup.getHandle(caloTopoToken_); 
+  //handles.l1Menu = setup.getHandle(l1GtTriggerMenuToken_); 
+  //handles.trackGeom = setup.getHandle(tkGeometryToken_); 
+  handles.bField = setup.getHandle(magFieldToken_); 
+  handles.ecalADCToGeV = setup.getHandle(ADCtoGeVToken_); 
+  handles.ecalLaser = setup.getHandle(ecalLaserDbToken_); 
+  handles.ecalInterCalib = setup.getHandle(ecalICToken_);  
   
-
   gsfEleExtraFiller_.getEvtContent(event,setup);
 }
 

@@ -1,5 +1,5 @@
 
-#include "FWCore/Framework/interface/EDFilter.h"
+#include "FWCore/Framework/interface/stream/EDFilter.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Utilities/interface/InputTag.h"
@@ -14,7 +14,7 @@
 #include "TTree.h"
 
 
-class MCEMuTruthFilter : public edm::EDFilter {
+class MCEMuTruthFilter : public edm::stream::EDFilter<> {
 
 private:
   int nrElesRequired_;
@@ -77,7 +77,6 @@ void MCEMuTruthFilter::endJob()
   
 }  
 
-
-
-
+#include "FWCore/PluginManager/interface/ModuleDef.h"
+#include "FWCore/Framework/interface/MakerMacros.h"
 DEFINE_FWK_MODULE(MCEMuTruthFilter);

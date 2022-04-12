@@ -4,7 +4,9 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
-#include "FWCore/Framework/interface/EDAnalyzer.h"
+#include "FWCore/Framework/interface/one/EDAnalyzer.h"
+#include "FWCore/Utilities/interface/InputTag.h"
+#include "FWCore/Utilities/interface/EDGetToken.h"
 
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
@@ -21,7 +23,7 @@
 #include <string>
 
 
-class DumpPFRecHitThres : public edm::EDAnalyzer { 
+class DumpPFRecHitThres : public edm::one::EDAnalyzer<edm::one::SharedResources> { 
 
 
 public:
@@ -37,15 +39,16 @@ public:
     token = consumes<T>(iPara.getParameter<edm::InputTag>(paraName));
   }
   
-  virtual void beginJob()override{}
-  virtual void beginRun(const edm::Run& run,const edm::EventSetup& iSetup)override{}
-  virtual void analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) override;
-  virtual void endJob()override{}
+  virtual void beginJob(){}
+  virtual void beginRun(const edm::Run& run,const edm::EventSetup& iSetup){}
+  virtual void analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+  virtual void endJob(){}
   
   void dumpBarrelThres(const EcalPFRecHitThresholds& thresholds,int iPhi);
   void dumpEndcapThres(const EcalPFRecHitThresholds& thresholds,int iY, int iZ);
 
 private:
+  edm::ESGetToken<EcalPFRecHitThresholds, EcalPFRecHitThresholdsRcd> ecalPFRecHitThresholdsToken_;
   bool written_;
   std::string logPrefix_;
 };
@@ -97,9 +100,7 @@ void DumpPFRecHitThres::analyze(const edm::Event& iEvent, const edm::EventSetup&
 {
   if(!written_){
     //edm::Service<TFileService> fs;
-    edm::ESHandle<EcalPFRecHitThresholds> thresHandle;
-    iSetup.get<EcalPFRecHitThresholdsRcd>().get(thresHandle);
-    
+    edm::ESHandle<EcalPFRecHitThresholds> thresHandle = iSetup.getHandle(ecalPFRecHitThresholdsToken_);
     dumpBarrelThres(*thresHandle,1);
     dumpEndcapThres(*thresHandle,50,1);
    
@@ -108,5 +109,6 @@ void DumpPFRecHitThres::analyze(const edm::Event& iEvent, const edm::EventSetup&
   }
 }
 
-
+#include "FWCore/PluginManager/interface/ModuleDef.h"
+#include "FWCore/Framework/interface/MakerMacros.h"
 DEFINE_FWK_MODULE(DumpPFRecHitThres);

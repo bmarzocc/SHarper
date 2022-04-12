@@ -1,4 +1,3 @@
-
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
@@ -11,6 +10,8 @@
 #include "FWCore/Utilities/interface/EDGetToken.h"
 
 #include "SHarper/TrigTools/interface/TrigToolsStructs.h"
+#include "DataFormats/EgammaCandidates/interface/GsfElectronFwd.h"
+#include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
@@ -24,7 +25,7 @@
 #include <string>
 
 
-class RegressDebugger : public edm::stream::EDAnalyzer { 
+class RegressDebugger : public edm::stream::EDAnalyzer<> { 
 
 private:
   
@@ -35,18 +36,16 @@ private:
 
 public:
   explicit RegressDebugger(const edm::ParameterSet& iPara);
-  ~RegressDebugger(){}
+  virtual ~RegressDebugger(){}
 
   RegressDebugger(const RegressDebugger& rhs)=delete;
   RegressDebugger& operator=(const RegressDebugger& rhs)=delete;
 
  private:
   virtual void beginJob(){}
-  virtual void beginRun(const edm::Run& run,const edm::EventSetup& iSetup);
+  virtual void beginRun(const edm::Run& run,const edm::EventSetup& iSetup){}
   virtual void analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
-  virtual void endJob();
+  virtual void endJob(){}
   
-  
-
 };
 

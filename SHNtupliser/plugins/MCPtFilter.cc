@@ -62,5 +62,6 @@ bool MCPtFilter::filter(edm::Event& event,const edm::EventSetup& setup)
   return false;
 }  
 
-
+#include "FWCore/PluginManager/interface/ModuleDef.h"
+#include "FWCore/Framework/interface/MakerMacros.h"
 DEFINE_FWK_MODULE(MCPtFilter);

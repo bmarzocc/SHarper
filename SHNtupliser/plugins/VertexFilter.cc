@@ -1,5 +1,5 @@
 
-#include "FWCore/Framework/interface/EDFilter.h"
+#include "FWCore/Framework/interface/stream/EDFilter.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Utilities/interface/InputTag.h"
@@ -8,7 +8,7 @@
 
 #include "FWCore/Framework/interface/MakerMacros.h"
 
-class VertexFilter : public edm::EDFilter {
+class VertexFilter : public edm::stream::EDFilter<> {
 
 private:
   edm::InputTag vtxCollTag_;
@@ -39,5 +39,7 @@ bool VertexFilter::filter(edm::Event& event,const edm::EventSetup& setup)
  else return false;
 
 }
-  
+
+#include "FWCore/PluginManager/interface/ModuleDef.h"
+#include "FWCore/Framework/interface/MakerMacros.h"  
 DEFINE_FWK_MODULE(VertexFilter);

@@ -37,6 +37,7 @@ namespace heep {
     edm::EDGetTokenT<EcalRecHitCollection> eeRecHitToken_;
     edm::Handle<EcalRecHitCollection> ebRecHitHandle_;
     edm::Handle<EcalRecHitCollection> eeRecHitHandle_;
+    edm::ESGetToken<CaloTopology, CaloTopologyRecord> caloTopoToken_;
     edm::ESHandle<CaloTopology> caloTopoHandle_;
     //trk isol stuff
     edm::EDGetTokenT<reco::BeamSpot> beamSpotToken_;

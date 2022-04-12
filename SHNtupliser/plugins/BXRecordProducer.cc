@@ -24,12 +24,14 @@ public:
   
 private:
   
-  void produce( edm::Event & event, const edm::EventSetup & ) override{
+  void produce( edm::Event & event, const edm::EventSetup & ){
     auto bunchSpacingP = std::make_unique<int>(bunchSpacing_);
     event.put(std::move(bunchSpacingP),"bunchSpacing");
   }
 
 };
+
+#include "FWCore/PluginManager/interface/ModuleDef.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 DEFINE_FWK_MODULE(BXRecordProducer);
 

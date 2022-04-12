@@ -111,4 +111,6 @@ void addL1Particles(const edm::InputTag& tag,const std::string& l1Name,const edm
 
 
 //define this as a plug-in
+#include "FWCore/PluginManager/interface/ModuleDef.h"
+#include "FWCore/Framework/interface/MakerMacros.h"
 DEFINE_FWK_MODULE(SHL1Ntupliser);

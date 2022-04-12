@@ -4,7 +4,9 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
-#include "FWCore/Framework/interface/EDAnalyzer.h"
+#include "FWCore/Framework/interface/one/EDAnalyzer.h"
+#include "FWCore/Utilities/interface/InputTag.h"
+#include "FWCore/Utilities/interface/EDGetToken.h"
 
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
@@ -13,7 +15,6 @@
 #include "DataFormats/EcalDetId/interface/EEDetId.h"
 #include "CondFormats/DataRecord/interface/EcalChannelStatusRcd.h"
 #include "CondFormats/EcalObjects/interface/EcalChannelStatus.h"
-
 
 #include "TTree.h"
 #include "TFile.h"
@@ -25,7 +26,7 @@
 #include <string>
 
 
-class DumpEcalChanStatus : public edm::EDAnalyzer { 
+class DumpEcalChanStatus : public edm::one::EDAnalyzer<edm::one::SharedResources> { 
 
 
 public:
@@ -36,17 +37,18 @@ public:
   DumpEcalChanStatus& operator=(const DumpEcalChanStatus& rhs)=delete;
 
  private:
-  template<typename T>
-  void getToken(edm::EDGetTokenT<T>& token,const edm::ParameterSet& iPara,const std::string& paraName){
-    token = consumes<T>(iPara.getParameter<edm::InputTag>(paraName));
+  template<typename T1>
+  void getToken(edm::EDGetTokenT<T1>& token,const edm::ParameterSet& iPara,const std::string& paraName){
+    token = consumes<T1>(iPara.getParameter<edm::InputTag>(paraName));
   }
   
-  virtual void beginJob()override{}
-  virtual void beginRun(const edm::Run& run,const edm::EventSetup& iSetup)override{}
-  virtual void analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) override;
-  virtual void endJob()override{}
+  virtual void beginJob(){}
+  virtual void beginRun(const edm::Run& run,const edm::EventSetup& iSetup){}
+  virtual void analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup);
+  virtual void endJob(){}
   
 private:
+  edm::ESGetToken<EcalChannelStatus, EcalChannelStatusRcd> ecalChStatusToken_;
   std::string name_;
   bool written_;
 };
@@ -107,8 +109,7 @@ void DumpEcalChanStatus::analyze(const edm::Event& iEvent, const edm::EventSetup
     deadChanEBHist->SetDirectory(&fs->file());
     deadChanEEPosHist->SetDirectory(&fs->file());
     deadChanEENegHist->SetDirectory(&fs->file());
-    edm::ESHandle<EcalChannelStatus> chanStatusHandle;
-    iSetup.get<EcalChannelStatusRcd>().get(chanStatusHandle);
+    edm::ESHandle<EcalChannelStatus> chanStatusHandle = iSetup.getHandle(ecalChStatusToken_);
     std::unordered_map<int,int> outMap;
     
     auto& chanStatusCont = *chanStatusHandle;
@@ -146,5 +147,6 @@ void DumpEcalChanStatus::analyze(const edm::Event& iEvent, const edm::EventSetup
   }
 }
 
-
+#include "FWCore/PluginManager/interface/ModuleDef.h"
+#include "FWCore/Framework/interface/MakerMacros.h"
 DEFINE_FWK_MODULE(DumpEcalChanStatus);

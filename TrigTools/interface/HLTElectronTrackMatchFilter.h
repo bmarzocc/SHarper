@@ -18,6 +18,10 @@
 //#include "DataFormats/GsfTrackReco/interface/GsfTrack.h"
 #include "DataFormats/EgammaReco/interface/SuperClusterFwd.h"
 #include "DataFormats/HLTReco/interface/TriggerFilterObjectWithRefs.h"
+
+#include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
+#include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
+
 //
 // class decleration
 //
@@ -46,6 +50,9 @@ private:
     unsigned long long cacheIDTDGeom_;
     unsigned long long cacheIDMagField_;
     
+    edm::ESGetToken<MagneticField, IdealMagneticFieldRecord> magFieldToken_;
+    edm::ESGetToken<TrackerGeometry, TrackerDigiGeometryRecord> tkGeoToken_;
+
     edm::ESHandle<MagneticField> magField_;
     edm::ESHandle<TrackerGeometry> trackerHandle_;
     

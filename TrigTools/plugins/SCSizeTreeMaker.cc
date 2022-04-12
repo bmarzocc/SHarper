@@ -157,6 +157,7 @@ private:
   edm::EDGetTokenT<reco::PFClusterCollection> seededPFClustersToken_; 
   edm::EDGetTokenT<reco::PFClusterCollection> unseededPFClustersToken_; 
   
+  edm::ESGetToken<CaloGeometry, CaloGeometryRecord> calGeometryToken_;
   edm::ESHandle<CaloGeometry> calGeometryHandle_;
   
   SeedTreeData treeData_;
@@ -355,8 +356,7 @@ getAllHitsInInfluence(const reco::SuperCluster& superClus,const reco::PFClusterC
 
 void SCSizeTreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
-  iSetup.get<CaloGeometryRecord>().get(calGeometryHandle_);
-
+  calGeometryHandle_ = iSetup.getHandle(calGeometryToken_);
 
   auto l1EGs = getHandle(iEvent,l1EGToken_);
   auto seededCands = getHandle(iEvent,seededCandToken_);

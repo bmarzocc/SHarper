@@ -8,6 +8,14 @@
 #include "FWCore/Utilities/interface/EDGetToken.h"
 #include "HLTrigger/HLTcore/interface/HLTPrescaleProvider.h"
 
+#include "Geometry/Records/interface/CaloGeometryRecord.h"
+#include "Geometry/Records/interface/CaloTopologyRecord.h"
+#include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
+#include "Geometry/Records/interface/TrackerDigiGeometryRecord.h"
+#include "CalibCalorimetry/EcalLaserCorrection/interface/EcalLaserDbRecord.h"
+#include "CondFormats/DataRecord/interface/EcalIntercalibConstantsRcd.h"
+#include "CondFormats/DataRecord/interface/EcalADCToGeVConstantRcd.h"
+
 #include "SHarper/HEEPAnalyzer/interface/HEEPEleSelector.h"
 #include "SHarper/HEEPAnalyzer/interface/HEEPEle.h"
 #include "SHarper/HEEPAnalyzer/interface/HEEPGsfEleExtraFiller.h"
@@ -36,7 +44,15 @@ namespace heep {
 
   class EventHelper {
     
-     //first necessary labels
+    //first necessary labels
+    edm::ESGetToken<CaloTopology, CaloTopologyRecord> caloTopoToken_;
+    edm::ESGetToken<CaloGeometry, CaloGeometryRecord> caloGeometryToken_;
+    edm::ESGetToken<L1GtTriggerMenu, L1GtTriggerMenuRcd> l1GtTriggerMenuToken_;
+    edm::ESGetToken<TrackerGeometry, TrackerDigiGeometryRecord> tkGeometryToken_;
+    edm::ESGetToken<MagneticField, IdealMagneticFieldRecord> magFieldToken_;
+    edm::ESGetToken<EcalADCToGeVConstant, EcalADCToGeVConstantRcd> ADCtoGeVToken_;
+    edm::ESGetToken<EcalLaserDbService, EcalLaserDbRecord> ecalLaserDbToken_;
+    edm::ESGetToken<EcalIntercalibConstants, EcalIntercalibConstantsRcd> ecalICToken_;
     //physics objects
     edm::EDGetTokenT<edm::View<pat::Electron>> eleTag_;
     edm::EDGetTokenT<edm::View<pat::Muon>> muonTag_;

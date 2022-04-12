@@ -1,4 +1,4 @@
-#include "FWCore/Framework/interface/EDProducer.h"
+#include "FWCore/Framework/interface/stream/EDProducer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Framework/interface/ESHandle.h"
@@ -12,8 +12,11 @@
 #include "CondFormats/EcalObjects/interface/EcalADCToGeVConstant.h"
 #include "CondFormats/DataRecord/interface/EcalADCToGeVConstantRcd.h"
 
-class DeCalibEcalRecHitProducer : public edm::EDProducer {
+class DeCalibEcalRecHitProducer : public edm::stream::EDProducer<> {
 private:
+  edm::ESGetToken<EcalLaserDbService, EcalLaserDbRecord> ecalLaserDbToken_;
+  edm::ESGetToken<EcalIntercalibConstants, EcalIntercalibConstantsRcd> ecalICToken_;
+  edm::ESGetToken<EcalADCToGeVConstant, EcalADCToGeVConstantRcd> ADCtoGeVToken_;
   edm::InputTag inputEBRecHitTag_;
   edm::InputTag inputEERecHitTag_;
   bool doLaser_;
@@ -58,15 +61,12 @@ void DeCalibEcalRecHitProducer::produce(edm::Event & iEvent, const edm::EventSet
   edm::Handle<EcalRecHitCollection> eeRecHitHandle;
   iEvent.getByLabel(inputEERecHitTag_,eeRecHitHandle);
 
-  edm::ESHandle<EcalLaserDbService> laserHandle;
-  iSetup.get<EcalLaserDbRecord>().get(laserHandle);
-  edm::ESHandle<EcalIntercalibConstants> interCalibHandle;
-  iSetup.get<EcalIntercalibConstantsRcd>().get(interCalibHandle);
+  edm::ESHandle<EcalLaserDbService> laserHandle = iSetup.getHandle(ecalLaserDbToken_); 
+  edm::ESHandle<EcalIntercalibConstants> interCalibHandle = iSetup.getHandle(ecalICToken_);  
   const EcalIntercalibConstantMap& interCalibMap = interCalibHandle->getMap(); 
 
-  edm::ESHandle<EcalADCToGeVConstant> adcToGeVHandle;
-  iSetup.get<EcalADCToGeVConstantRcd>().get(adcToGeVHandle);
-
+  edm::ESHandle<EcalADCToGeVConstant> adcToGeVHandle =iSetup.getHandle(ADCtoGeVToken_);
+  
   auto newEBHits = std::make_unique<EcalRecHitCollection>();
   auto newEEHits = std::make_unique<EcalRecHitCollection>();  
   
@@ -113,6 +113,6 @@ float DeCalibEcalRecHitProducer::getLaserCorr(const DetId& id,const edm::ESHandl
   return laserCalib;
 }
 
+#include "FWCore/PluginManager/interface/ModuleDef.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
-
 DEFINE_FWK_MODULE(DeCalibEcalRecHitProducer);

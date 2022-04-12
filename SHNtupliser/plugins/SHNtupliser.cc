@@ -173,4 +173,6 @@ void SHNtupliser::endJob()
 
 
 //define this as a plug-in
+#include "FWCore/PluginManager/interface/ModuleDef.h"
+#include "FWCore/Framework/interface/MakerMacros.h"
 DEFINE_FWK_MODULE(SHNtupliser);

@@ -62,6 +62,8 @@ private:
 
   std::vector<FilterToken > seededFilterTokens_,unseededFilterTokens_;
   std::vector<VarToken > seededVarTokens_,unseededVarTokens_;
+
+  edm::ESGetToken<CaloGeometry, CaloGeometryRecord> calGeometryToken_;
   edm::ESHandle<CaloGeometry> calGeometryHandle_;
   
 public:
@@ -184,7 +186,7 @@ void SeededVsUnseededValidator::printFilterInfo(const edm::Event& iEvent,FilterT
 
 void SeededVsUnseededValidator::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
-  iSetup.get<CaloGeometryRecord>().get(calGeometryHandle_);
+  calGeometryHandle_ = iSetup.getHandle(calGeometryToken_);
 
   bool pass = lastFilterMatches(iEvent);
   auto l1EGs = getHandle(iEvent,l1EGToken_);

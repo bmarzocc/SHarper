@@ -1,5 +1,5 @@
 
-#include "FWCore/Framework/interface/EDAnalyzer.h"
+#include "FWCore/Framework/interface/one/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Utilities/interface/InputTag.h"
@@ -11,7 +11,7 @@
 
 #include "TTree.h"
 
-class PFElePassingChecker : public edm::EDAnalyzer {
+class PFElePassingChecker : public edm::one::EDAnalyzer<edm::one::SharedResources> {
 
 private:
 
@@ -109,6 +109,6 @@ void PFElePassingChecker::endJob()
   
 }  
 
-
-
+#include "FWCore/PluginManager/interface/ModuleDef.h"
+#include "FWCore/Framework/interface/MakerMacros.h"
 DEFINE_FWK_MODULE(PFElePassingChecker);
