@@ -19,3 +19,11 @@ cd $CMSSW_BASE/src
 git clone git@github.com:cms-egamma/SHarper-UserCode.git SHarper
 ```
 
+or from the bmarzocc repo
+
+```
+cd $CMSSW_BASE/src
+git clone git@github.com:bmarzocc/usercode.git SHarper
+cd SHarper
+git checkout 123XNtup
+```

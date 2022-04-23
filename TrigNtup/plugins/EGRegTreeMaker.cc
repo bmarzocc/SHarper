@@ -10,6 +10,9 @@
 
 #include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+#include "SimDataFormats/CaloAnalysis/interface/SimCluster.h"
+#include "SimDataFormats/CaloAnalysis/interface/CaloParticle.h"
+#include "SimDataFormats/CaloAnalysis/interface/CaloParticleFwd.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
@@ -42,12 +45,13 @@ private:
   EGRegTreeStruct egRegTreeData_;
   TTree* egRegTree_;
   std::string treeName_;
-
+  
   edm::ESGetToken<CaloTopology,CaloTopologyRecord> caloTopologyToken_;
   edm::ESGetToken<EcalChannelStatus,EcalChannelStatusRcd> channelStatusToken_;
   edm::EDGetTokenT<reco::VertexCollection>  verticesToken_;
   edm::EDGetTokenT<double> rhoToken_;
   edm::EDGetTokenT<reco::GenParticleCollection> genPartsToken_;
+  edm::EDGetTokenT<std::vector<CaloParticle> > caloPartToken_;
   std::vector<edm::EDGetTokenT<reco::SuperClusterCollection>> scTokens_;
   std::vector<edm::EDGetTokenT<reco::SuperClusterCollection>> scAltTokens_;
   edm::EDGetTokenT<EcalRecHitCollection> ecalHitsEBToken_;
@@ -83,6 +87,7 @@ private:
     }
   }
   static const reco::GenParticle* matchGenPart(float eta,float phi,const std::vector<reco::GenParticle>& genParts);
+  static const CaloParticle* matchCaloPart(const reco::GenParticle& genPart,const std::vector<reco::GenParticle>& genParts,const std::vector<CaloParticle>& caloParts);
   const reco::SuperCluster*  matchSC(const reco::SuperCluster* scToMatch,const std::vector<edm::Handle<reco::SuperClusterCollection> >& scHandles);
   static const reco::SuperCluster*  matchSC(float eta,float phi,const std::vector<edm::Handle<reco::SuperClusterCollection> >& scHandles);
 };
@@ -101,6 +106,7 @@ EGRegTreeMaker::EGRegTreeMaker(const edm::ParameterSet& iPara):
   setToken(verticesToken_,iPara,"verticesTag");
   setToken(rhoToken_,iPara,"rhoTag");
   setToken(genPartsToken_,iPara,"genPartsTag");
+  setToken(caloPartToken_,iPara,"caloPartsTag");
   setToken(scTokens_,iPara,"scTag");
   setToken(scAltTokens_,iPara,"scAltTag");
   setToken(ecalHitsEBToken_,iPara,"ecalHitsEBTag");
@@ -199,6 +205,7 @@ void EGRegTreeMaker::analyze(const edm::Event& iEvent,const edm::EventSetup& iSe
   auto ecalHitsEBHandle = getHandle(iEvent,ecalHitsEBToken_);
   auto ecalHitsEEHandle = getHandle(iEvent,ecalHitsEEToken_);
   auto genPartsHandle = getHandle(iEvent,genPartsToken_);
+  auto caloPartsHandle = getHandle(iEvent,caloPartToken_);
   auto verticesHandle = getHandle(iEvent,verticesToken_);
   auto rhoHandle = getHandle(iEvent,rhoToken_);
   auto elesHandle = getHandle(iEvent,elesToken_);
@@ -227,6 +234,7 @@ void EGRegTreeMaker::analyze(const edm::Event& iEvent,const edm::EventSetup& iSe
     for(const auto& scHandle : scHandles){
       for(const auto& sc: *scHandle){
 	const reco::GenParticle* genPart = genPartsHandle.isValid() ? matchGenPart(sc.eta(),sc.phi(),*genPartsHandle) : nullptr;
+        const CaloParticle* caloPart = (genPartsHandle.isValid() && caloPartsHandle.isValid()) ? matchCaloPart(*genPart,*genPartsHandle,*caloPartsHandle) : nullptr;
 	const reco::GsfElectron* ele = elesHandle.isValid() ? matchEle(sc.seed()->seed().rawId(),*elesHandle) : nullptr;
 	const reco::Photon* pho = phosHandle.isValid() ? matchPho(sc.seed()->seed().rawId(),*phosHandle) : nullptr;
 	const reco::SuperCluster* scAlt = matchSC(&sc,scAltHandles);
@@ -239,7 +247,7 @@ void EGRegTreeMaker::analyze(const edm::Event& iEvent,const edm::EventSetup& iSe
 			      *ecalHitsEBHandle,*ecalHitsEEHandle,
 			      *caloTopoHandle,
 			      *chanStatusHandle,
-			      &sc,genPart,ele,pho,scAlt,
+			      &sc,genPart,caloPart,ele,pho,scAlt,
 			      altEles,altPhos);
 	  egRegTree_->Fill();
 	}
@@ -253,6 +261,7 @@ void EGRegTreeMaker::analyze(const edm::Event& iEvent,const edm::EventSetup& iSe
 	const reco::SuperCluster* scAlt = matchSC(sc,scAltHandles);
 	const reco::GsfElectron* ele = elesHandle.isValid() && sc ? matchEle(sc->seed()->seed().rawId(),*elesHandle) : nullptr;
 	const reco::Photon* pho = phosHandle.isValid() && sc ? matchPho(sc->seed()->seed().rawId(),*phosHandle) : nullptr;
+        const CaloParticle* caloPart = caloPartsHandle.isValid() ? matchCaloPart(genPart,*genPartsHandle,*caloPartsHandle) : nullptr;
 	
 	const std::vector<const reco::GsfElectron*> altEles = matchToAltCollsBySCSeedId(ele,eleAltHandles);
 	const std::vector<const reco::Photon*> altPhos = matchToAltCollsBySCSeedId(pho,phoAltHandles);
@@ -262,7 +271,7 @@ void EGRegTreeMaker::analyze(const edm::Event& iEvent,const edm::EventSetup& iSe
 			    *ecalHitsEBHandle,*ecalHitsEEHandle,
 			    *caloTopoHandle,
 			    *chanStatusHandle,
-			    sc,&genPart,ele,pho,scAlt,
+			    sc,&genPart,caloPart,ele,pho,scAlt,
 			    altEles,altPhos);
 	egRegTree_->Fill();
       }
@@ -286,6 +295,18 @@ const reco::GenParticle*  EGRegTreeMaker::matchGenPart(float eta,float phi,const
 	  
       }
     }
+  }
+  return bestMatch;
+}
+
+const CaloParticle*  EGRegTreeMaker::matchCaloPart(const reco::GenParticle& genPart,const std::vector<reco::GenParticle>& genParts,const std::vector<CaloParticle>& caloParts)
+{
+  const CaloParticle* bestMatch=nullptr;
+  for(const auto& caloPart : caloParts){
+    const auto genParticle = genParts[caloPart.g4Tracks()[0].genpartIndex()-1]; 
+    float dR2 = reco::deltaR2(genParticle.eta(),genParticle.phi(),genPart.eta(),genPart.phi()); 
+    float dE = fabs(genParticle.energy()-genPart.energy()); 
+    if(genPart.statusFlags().isPrompt() && genPart.statusFlags().isFirstCopy() && dR2<1.e-6 && dE<1.e-6) bestMatch = &caloPart;
   }
   return bestMatch;
 }

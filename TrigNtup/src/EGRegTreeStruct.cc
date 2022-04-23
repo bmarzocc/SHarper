@@ -24,6 +24,7 @@ void EGRegTreeStruct::createBranches(TTree* tree)
   tree->Branch("eleSSFull",&eleSSFull,eleSSFull.contents().c_str());
   tree->Branch("phoSSFull",&phoSSFull,phoSSFull.contents().c_str());  
   tree->Branch("mc",&mc,mc.contents().c_str());
+  tree->Branch("sim",&sim,sim.contents().c_str());
   tree->Branch("clus1",&clus1,clus1.contents().c_str());
   tree->Branch("clus2",&clus2,clus2.contents().c_str());
   tree->Branch("clus3",&clus3,clus3.contents().c_str());
@@ -52,6 +53,7 @@ void EGRegTreeStruct::setBranchAddresses(TTree* tree)
   tree->SetBranchAddress("eleSSFull",&eleSSFull);
   tree->SetBranchAddress("phoSSFull",&phoSSFull);
   tree->SetBranchAddress("mc",&mc);
+  tree->SetBranchAddress("sim",&sim);
   tree->SetBranchAddress("clus1",&clus1);
   tree->SetBranchAddress("clus2",&clus2);
   tree->SetBranchAddress("clus3",&clus3);
@@ -84,8 +86,38 @@ void GenInfoStruct::fill(const reco::GenParticle& genPart,float iDR)
   dR = iDR;
 }
 
+float SimInfoStruct::computeSimEnergy(const CaloParticle* caloPart)
+{
+  if(!caloPart) return 0.;
+
+  float simEnergy = 0.;
+  const auto& simClusters = caloPart->simClusters();
+  for(auto const& simCluster: simClusters){
+      auto hits_and_energies = simCluster->hits_and_energies();
+      for(auto const& hit: hits_and_energies)
+      {
+          DetId id(hit.first);    
+          if(id.subdetId()!=EcalBarrel && id.subdetId()!=EcalEndcap && id.subdetId() != EcalPreshower) continue;
+          simEnergy += hit.second;            
+      }
+  }  
+  return simEnergy;
+}
+
+void SimInfoStruct::fill(const CaloParticle& caloPart,float iDR)
+{
+  energy = computeSimEnergy(&caloPart);
+  genEnergy = caloPart.energy();
+  pt = caloPart.pt();
+  eta = caloPart.eta();
+  phi = caloPart.phi();
+  pdgId = caloPart.pdgId();
+  status = caloPart.status();
+  dR = iDR;
+}
+
 void EGRegTreeStruct::fill(const edm::Event& event,int iNrVert,float iRho,float iNrPUInt,float iNrPUIntTrue,
-			   const EcalRecHitCollection& ecalHitsEB,const EcalRecHitCollection& ecalHitsEE,const CaloTopology& topo,const EcalChannelStatus& ecalChanStatus,const reco::SuperCluster* iSC,const reco::GenParticle* iMC,const reco::GsfElectron* iEle,const reco::Photon* iPho,const reco::SuperCluster* scAlt, const std::vector<const reco::GsfElectron*>& altEles,const std::vector<const reco::Photon*>& altPhos)
+			   const EcalRecHitCollection& ecalHitsEB,const EcalRecHitCollection& ecalHitsEE,const CaloTopology& topo,const EcalChannelStatus& ecalChanStatus,const reco::SuperCluster* iSC,const reco::GenParticle* iMC,const CaloParticle* iSIM,const reco::GsfElectron* iEle,const reco::Photon* iPho,const reco::SuperCluster* scAlt, const std::vector<const reco::GsfElectron*>& altEles,const std::vector<const reco::Photon*>& altPhos)
 {
   clear();
 
@@ -113,6 +145,7 @@ void EGRegTreeStruct::fill(const edm::Event& event,int iNrVert,float iRho,float 
     fillClus(clus3,3);  
   }
   if(iMC) mc.fill(*iMC, iSC ? std::sqrt(reco::deltaR2(iSC->eta(),iSC->phi(),iMC->eta(),iMC->phi())) : 999);
+  if(iSIM) sim.fill(*iSIM, iSC ? std::sqrt(reco::deltaR2(iSC->eta(),iSC->phi(),iSIM->eta(),iSIM->phi())) : 999); 
   if(iEle){
     ele.fill(*iEle);
     eleSSFull.fill(iEle->full5x5_showerShape(),*iEle);

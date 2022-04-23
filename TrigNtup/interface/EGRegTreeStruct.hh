@@ -13,6 +13,10 @@
 #include "RecoEcal/EgammaCoreTools/interface/EcalClusterTools.h"
 #include "CondFormats/EcalObjects/interface/EcalChannelStatus.h"
 
+#include "SimDataFormats/CaloAnalysis/interface/SimCluster.h"
+#include "SimDataFormats/CaloAnalysis/interface/CaloParticle.h"
+#include "SimDataFormats/CaloAnalysis/interface/CaloParticleFwd.h"
+
 #include "TTree.h"
 
 namespace reco{
@@ -104,6 +108,14 @@ struct GenInfoStruct {
   void fill(const reco::GenParticle& genPart, float iDR);
 };
 
+struct SimInfoStruct {
+  float energy,genEnergy,pt,eta,phi,pdgId,status,dR;
+  static std::string contents(){return "energy/F:genEnergy:pt:eta:phi:pdgId:status:dR";}
+  float computeSimEnergy(const CaloParticle* caloPart);
+  void clear(){energy=genEnergy=pt=eta=phi=pdgId=status=dR=0;}
+  void fill(const CaloParticle& caloPart, float iDR);
+};
+
 struct EGRegTreeStruct {
   int nrVert;
   float rho;
@@ -118,6 +130,7 @@ struct EGRegTreeStruct {
   ShowerShapeStruct eleSSFull;
   ShowerShapeStruct phoSSFull;
   GenInfoStruct mc;
+  SimInfoStruct sim;
   ClustStruct clus1;
   ClustStruct clus2;
   ClustStruct clus3;
@@ -129,7 +142,7 @@ struct EGRegTreeStruct {
   }
   void createBranches(TTree* tree);
   void setBranchAddresses(TTree* tree);
-  void fill(const edm::Event& event,int iNrVert,float iRho,float nrPUInt,float nrTruePUInt,const EcalRecHitCollection& ecalHitsEB,const EcalRecHitCollection& ecalHitsEE,const CaloTopology& topo,const EcalChannelStatus& ecalChanStatus,const reco::SuperCluster* iSC,const reco::GenParticle* iMC,const reco::GsfElectron* iEle,const reco::Photon* iPho,const reco::SuperCluster* altSC,const std::vector<const reco::GsfElectron*>& altEles,const std::vector<const reco::Photon*>& altPhos );
+  void fill(const edm::Event& event,int iNrVert,float iRho,float nrPUInt,float nrTruePUInt,const EcalRecHitCollection& ecalHitsEB,const EcalRecHitCollection& ecalHitsEE,const CaloTopology& topo,const EcalChannelStatus& ecalChanStatus,const reco::SuperCluster* iSC,const reco::GenParticle* iMC,const CaloParticle* iSIM,const reco::GsfElectron* iEle,const reco::Photon* iPho,const reco::SuperCluster* altSC,const std::vector<const reco::GsfElectron*>& altEles,const std::vector<const reco::Photon*>& altPhos );
   void clear(){
     nrVert=0;
     rho=0.;
@@ -144,6 +157,7 @@ struct EGRegTreeStruct {
     eleSSFull.clear();
     phoSSFull.clear();
     mc.clear();
+    sim.clear();
     clus1.clear();
     clus2.clear();
     clus3.clear();

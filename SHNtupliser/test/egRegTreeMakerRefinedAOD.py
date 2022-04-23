@@ -14,7 +14,8 @@ options.parseArguments()
 
 #print options.inputFiles
 process.source = cms.Source("PoolSource",
-                            fileNames = cms.untracked.vstring(options.inputFiles),  
+                            #fileNames = cms.untracked.vstring(options.inputFiles),  
+                            fileNames = cms.untracked.vstring('file:step3.root'), 
                           )
 
 
@@ -52,13 +53,15 @@ process.maxEvents = cms.untracked.PSet(
 
 
 process.TFileService = cms.Service("TFileService",
-                                   fileName = cms.string(options.outputFile)
+                                   #fileName = cms.string(options.outputFile)
+                                   fileName = cms.string('egmRegTree.root')
 )
 
 process.egRegTreeMaker = cms.EDAnalyzer("EGRegTreeMaker",
                                         verticesTag = cms.InputTag("offlinePrimaryVertices"),
                                         rhoTag = cms.InputTag("fixedGridRhoFastjetAllTmp"),
                                         genPartsTag = cms.InputTag("genParticles"),
+                                        caloPartsTag = cms.InputTag("signalCaloParticles"),
                                         puSumTag = cms.InputTag("addPileupInfo"),
                                      #   scTag = cms.VInputTag("particleFlowSuperClusterECAL:particleFlowSuperClusterECALBarrel","particleFlowSuperClusterECAL:particleFlowSuperClusterECALEndcapWithPreshower"),
                                         scTag = cms.VInputTag("particleFlowEGamma",),
