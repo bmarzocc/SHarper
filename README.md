@@ -23,7 +23,7 @@ or from the bmarzocc repo
 
 ```
 cd $CMSSW_BASE/src
-git clone git@github.com:bmarzocc/usercode.git SHarper
+git clone git@github.com:bmarzocc/SHarper.git SHarper
 cd SHarper
 git checkout 123XNtup
 ```
