@@ -44,7 +44,7 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(-1),
+    input = cms.untracked.int32(1),
     output = cms.optional.untracked.allowed(cms.int32,cms.PSet)
 )
 
@@ -114,6 +114,39 @@ muonSimClassificationByHitsTask.remove(muonSimClassifier)
 # Other statements
 from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, '123X_mcRun3_2021_realistic_v11', '')
+
+#process.myICs = cms.ESSource("PoolDBESSource",
+#     connect = cms.string("frontier://FrontierProd/CMS_CONDITIONS"),
+#     toGet = cms.VPSet(
+#         cms.PSet(
+#             record = cms.string('EcalIntercalibConstantsRcd'),
+#             tag = cms.string('EcalIntercalibConstants_MC_Digi_2018')
+#         )
+#     )
+#)
+#process.es_prefer_icReco = cms.ESPrefer("PoolDBESSource","myICs")
+
+process.myPFRechitThres = cms.ESSource("PoolDBESSource",
+     connect = cms.string("frontier://FrontierProd/CMS_CONDITIONS"),
+     toGet = cms.VPSet(
+         cms.PSet(
+             record = cms.string('EcalPFRecHitThresholdsRcd'),
+             tag = cms.string('EcalPFRecHitThresholds_UL_2018_2e3sig')
+         )
+     )
+)
+process.es_prefer_pfRechitThres = cms.ESPrefer("PoolDBESSource","myPFRechitThres")
+
+process.myTPGLinearization = cms.ESSource("PoolDBESSource",
+     connect = cms.string("frontier://FrontierProd/CMS_CONDITIONS"),
+     toGet = cms.VPSet(
+         cms.PSet(
+             record = cms.string('EcalTPGLinearizationConstRcd'),
+             tag = cms.string('EcalTPGLinearizationConst_UL_2018_mc')
+         )
+     )
+)
+process.es_prefer_tpgLinearization = cms.ESPrefer("PoolDBESSource","myTPGLinearization")
 
 process.load("SHarper.TrigNtup.rePFSuperCluster_cff")
 process.egRegTreeMaker = cms.EDAnalyzer("EGRegTreeMaker",
