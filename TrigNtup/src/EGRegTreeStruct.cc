@@ -86,7 +86,7 @@ void GenInfoStruct::fill(const reco::GenParticle& genPart,float iDR)
   dR = iDR;
 }
 
-float SimInfoStruct::computeSimEnergy(const CaloParticle* caloPart)
+float SimInfoStruct::computeSimEnergy(const CaloParticle* caloPart, bool withES)
 {
   if(!caloPart) return 0.;
 
@@ -96,9 +96,13 @@ float SimInfoStruct::computeSimEnergy(const CaloParticle* caloPart)
       auto hits_and_energies = simCluster->hits_and_energies();
       for(auto const& hit: hits_and_energies)
       {
-          DetId id(hit.first);    
-          if(id.subdetId()!=EcalBarrel && id.subdetId()!=EcalEndcap && id.subdetId() != EcalPreshower) continue;
-          simEnergy += hit.second;            
+          DetId id(hit.first);  
+          if(withES){
+             if(id.subdetId()!=EcalBarrel && id.subdetId()!=EcalEndcap && id.subdetId()!=EcalPreshower) continue; 
+          }else{
+             if(id.subdetId()!=EcalBarrel && id.subdetId()!=EcalEndcap) continue;
+          } 
+          simEnergy += hit.second;         
       }
   }  
   return simEnergy;
@@ -106,7 +110,8 @@ float SimInfoStruct::computeSimEnergy(const CaloParticle* caloPart)
 
 void SimInfoStruct::fill(const CaloParticle& caloPart,float iDR)
 {
-  energy = computeSimEnergy(&caloPart);
+  energy = computeSimEnergy(&caloPart,false);
+  energyWithES = computeSimEnergy(&caloPart,true);
   genEnergy = caloPart.energy();
   pt = caloPart.pt();
   eta = caloPart.eta();

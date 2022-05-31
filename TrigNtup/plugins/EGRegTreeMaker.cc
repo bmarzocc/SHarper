@@ -41,6 +41,8 @@
 #include "TTree.h"
 
 #include <string>
+#include <vector>
+#include <array>
 
 class EGRegTreeMaker : public edm::one::EDAnalyzer<edm::one::SharedResources> {
 
@@ -55,6 +57,7 @@ private:
   edm::EDGetTokenT<double> rhoToken_;
   edm::EDGetTokenT<reco::GenParticleCollection> genPartsToken_;
   edm::EDGetTokenT<std::vector<CaloParticle> > caloPartToken_;
+  edm::EDGetTokenT<std::vector<reco::PFCluster> > pfClusterToken_; 
   std::vector<edm::EDGetTokenT<reco::SuperClusterCollection>> scTokens_;
   std::vector<edm::EDGetTokenT<reco::SuperClusterCollection>> scAltTokens_;
   edm::EDGetTokenT<EcalRecHitCollection> ecalHitsEBToken_;
@@ -70,7 +73,11 @@ private:
   EGRegTreeMaker& operator=(const EGRegTreeMaker& rhs)=delete;
 
   std::vector<std::vector<std::pair<DetId, float>>> hitsAndEnergies_CaloPart; 
-
+  
+  bool fillFromSC_;
+  bool fillFromMC_;
+  bool fillFromSIM_;
+  
 public:
   explicit EGRegTreeMaker(const edm::ParameterSet& iPara);
   virtual ~EGRegTreeMaker();
@@ -93,11 +100,17 @@ private:
   }
   static const reco::GenParticle* matchGenPart(float eta,float phi,const std::vector<reco::GenParticle>& genParts);
   static const CaloParticle* matchCaloPart(const reco::GenParticle& genPart,const std::vector<reco::GenParticle>& genParts,const std::vector<CaloParticle>& caloParts);
-  const CaloParticle* matchSCToCalo(const reco::SuperCluster* scToMatch,const std::vector<CaloParticle>& caloParts);
+  const std::vector<reco::PFCluster> getBestMatchedPFCluster(const std::vector<CaloParticle>& caloParts,const std::vector<reco::PFCluster>& pfClusters);
+  const reco::SuperCluster* matchSCToCalo(const CaloParticle* caloToMatch,int iCalo,const std::vector<edm::Handle<reco::SuperClusterCollection> >& scHandles, std::vector<reco::PFCluster>* bestPFClusters);
   const reco::SuperCluster*  matchSC(const reco::SuperCluster* scToMatch,const std::vector<edm::Handle<reco::SuperClusterCollection> >& scHandles);
   static const reco::SuperCluster*  matchSC(float eta,float phi,const std::vector<edm::Handle<reco::SuperClusterCollection> >& scHandles);
   std::vector<std::pair<DetId, float> >* getHitsAndEnergiesCaloPart(const CaloParticle* iCaloParticle, float simHitEnergy_cut);
   std::vector<double> getScores(const reco::CaloClusterPtr seed, const std::vector<std::pair<DetId, float> > *hits_and_energies_CaloPart);
+  std::vector<double> getScores(const reco::PFCluster* pfCluster, const std::vector<std::pair<DetId, float> > *hits_and_energies_CaloPart);
+  bool isInWindow(double genEta,double genPhi,double seedEta,double seedPhi);
+  double deltaPhi(double phi1, double phi2);
+  std::array<double,3> dynamicWindow(double eta);
+  
 
 };
 
@@ -107,15 +120,29 @@ EGRegTreeMaker::EGRegTreeMaker(const edm::ParameterSet& iPara):
   egRegTree_(nullptr),
   treeName_("egRegTree"),
   caloTopologyToken_(esConsumes()),
-  channelStatusToken_(esConsumes())
+  channelStatusToken_(esConsumes()),
+  fillFromSC_(false),
+  fillFromMC_(false),
+  fillFromSIM_(false)
 {
+  if(iPara.exists("fillFromSC")){
+     fillFromSC_ = iPara.getParameter<bool>("fillFromSC"); 
+  } 
+  if(iPara.exists("fillFromMC")){
+     fillFromMC_ = iPara.getParameter<bool>("fillFromMC"); 
+  } 
+  if(iPara.exists("fillFromSIM")){
+     fillFromSIM_ = iPara.getParameter<bool>("fillFromSIM"); 
+  } 
   if(iPara.exists("treeName")){
     treeName_ = iPara.getParameter<std::string>("treeName");
   }
+
   setToken(verticesToken_,iPara,"verticesTag");
   setToken(rhoToken_,iPara,"rhoTag");
   setToken(genPartsToken_,iPara,"genPartsTag");
   setToken(caloPartToken_,iPara,"caloPartsTag");
+  setToken(pfClusterToken_,iPara,"pfClusTag");
   setToken(scTokens_,iPara,"scTag");
   setToken(scAltTokens_,iPara,"scAltTag");
   setToken(ecalHitsEBToken_,iPara,"ecalHitsEBTag");
@@ -141,6 +168,16 @@ void EGRegTreeMaker::beginJob()
   egRegTree_ = new TTree(treeName_.c_str(),"");
   egRegTreeData_.setNrEnergies(eleAltTokens_.size(),phoAltTokens_.size());
   egRegTreeData_.createBranches(egRegTree_);
+
+  if((fillFromSC_&& fillFromMC_) || (fillFromSC_&& fillFromSIM_) || (fillFromMC_&& fillFromSIM_) || (fillFromSC_&& fillFromMC_ && fillFromSIM_) || (!fillFromSC_&& !fillFromMC_ && !fillFromSIM_)){
+     std::cout << "WARNING: Filling options are exclusive! Setting to FillFromMC" << std::endl;
+     fillFromSC_  = false;
+     fillFromMC_  = true;
+     fillFromSIM_ = false;
+  }
+  if(fillFromSC_) std::cout <<  "Running in \"fillFromSC\" mode..." << std::endl; 
+  if(fillFromMC_) std::cout <<  "Running in \"fillFromMC\" mode..." << std::endl; 
+  if(fillFromSIM_) std::cout << "Running in \"fillFromSIM\" mode..." << std::endl; 
 } 
 
 void EGRegTreeMaker::beginRun(const edm::Run& run,const edm::EventSetup& iSetup)
@@ -213,6 +250,7 @@ void EGRegTreeMaker::analyze(const edm::Event& iEvent,const edm::EventSetup& iSe
   auto scAltHandles = getHandle(iEvent,scAltTokens_);
   auto ecalHitsEBHandle = getHandle(iEvent,ecalHitsEBToken_);
   auto ecalHitsEEHandle = getHandle(iEvent,ecalHitsEEToken_);
+  auto pfClustersHandle = getHandle(iEvent,pfClusterToken_);
   auto genPartsHandle = getHandle(iEvent,genPartsToken_);
   auto caloPartsHandle = getHandle(iEvent,caloPartToken_);
   auto verticesHandle = getHandle(iEvent,verticesToken_);
@@ -238,15 +276,12 @@ void EGRegTreeMaker::analyze(const edm::Event& iEvent,const edm::EventSetup& iSe
     }
   }
 
-  bool fillFromSC = false;
-  bool fillFromMC = false;
-  bool fillFromSIM = true;
-
-  if(fillFromSC){
+  if(fillFromSC_){
+    //std::cout <<  "Running in \"fillFromSC\" mode..." << std::endl; 
     for(const auto& scHandle : scHandles){
       for(const auto& sc: *scHandle){
 	const reco::GenParticle* genPart = genPartsHandle.isValid() ? matchGenPart(sc.eta(),sc.phi(),*genPartsHandle) : nullptr;
-        const CaloParticle* caloPart = (genPartsHandle.isValid() && caloPartsHandle.isValid()) ? matchCaloPart(*genPart,*genPartsHandle,*caloPartsHandle) : nullptr;
+        const CaloParticle* caloPart = (genPartsHandle.isValid() && caloPartsHandle.isValid() && genPart!=nullptr) ? matchCaloPart(*genPart,*genPartsHandle,*caloPartsHandle) : nullptr;
 	const reco::GsfElectron* ele = elesHandle.isValid() ? matchEle(sc.seed()->seed().rawId(),*elesHandle) : nullptr;
 	const reco::Photon* pho = phosHandle.isValid() ? matchPho(sc.seed()->seed().rawId(),*phosHandle) : nullptr;
 	const reco::SuperCluster* scAlt = matchSC(&sc,scAltHandles);
@@ -265,32 +300,35 @@ void EGRegTreeMaker::analyze(const edm::Event& iEvent,const edm::EventSetup& iSe
 	}
       }
     }
-  }else if(fillFromSIM){
+  }else if(fillFromSIM_){
+    //std::cout <<  "Running in \"fillFromSIM\" mode..." << std::endl; 
+    std::vector<reco::PFCluster> bestPFCluster = getBestMatchedPFCluster(*caloPartsHandle,*pfClustersHandle);
 
-    for(const auto& scHandle : scHandles){
-      for(const auto& sc: *scHandle){
-        const CaloParticle* caloPart = caloPartsHandle.isValid() ? matchSCToCalo(&sc,*caloPartsHandle) : nullptr;
-        const reco::GenParticle* genPart = (genPartsHandle.isValid() && caloPartsHandle.isValid() && caloPart!=nullptr) ? &((*genPartsHandle)[caloPart->g4Tracks()[0].genpartIndex()-1]) : nullptr;
-	const reco::GsfElectron* ele = elesHandle.isValid() ? matchEle(sc.seed()->seed().rawId(),*elesHandle) : nullptr;
-	const reco::Photon* pho = phosHandle.isValid() ? matchPho(sc.seed()->seed().rawId(),*phosHandle) : nullptr;
-	const reco::SuperCluster* scAlt = matchSC(&sc,scAltHandles);
+    int iCalo=0;
+    for(const auto& caloPart : *caloPartsHandle){
+      if((std::abs(caloPart.pdgId())==11 || caloPart.pdgId()==22)){
+        const reco::SuperCluster* sc = matchSCToCalo(&caloPart,iCalo,scHandles,&bestPFCluster);
+	const reco::SuperCluster* scAlt = matchSC(sc,scAltHandles);
+	const reco::GsfElectron* ele = elesHandle.isValid() && sc ? matchEle(sc->seed()->seed().rawId(),*elesHandle) : nullptr;
+	const reco::Photon* pho = phosHandle.isValid() && sc ? matchPho(sc->seed()->seed().rawId(),*phosHandle) : nullptr;
+        const reco::GenParticle* genPart = genPartsHandle.isValid() ? &((*genPartsHandle)[caloPart.g4Tracks()[0].genpartIndex()-1]) : nullptr;
 	
 	const std::vector<const reco::GsfElectron*> altEles = matchToAltCollsBySCSeedId(ele,eleAltHandles);
 	const std::vector<const reco::Photon*> altPhos = matchToAltCollsBySCSeedId(pho,phoAltHandles);
 
-	if(hasBasicClusters(sc)){
-	  egRegTreeData_.fill(iEvent,nrVert,*rhoHandle,nrPUInt,nrPUIntTrue,
-			      *ecalHitsEBHandle,*ecalHitsEEHandle,
-			      *caloTopoHandle,
-			      *chanStatusHandle,
-			      &sc,genPart,caloPart,ele,pho,scAlt,
-			      altEles,altPhos);
-	  egRegTree_->Fill();
-	}
-      }
-    }
-  }else if(fillFromMC){
 
+	egRegTreeData_.fill(iEvent,nrVert,*rhoHandle,nrPUInt,nrPUIntTrue,
+			    *ecalHitsEBHandle,*ecalHitsEEHandle,
+			    *caloTopoHandle,
+			    *chanStatusHandle,
+			    sc,genPart,&caloPart,ele,pho,scAlt,
+			    altEles,altPhos);
+	egRegTree_->Fill();
+      }
+      iCalo++;
+    }
+  }else if(fillFromMC_){
+    //std::cout <<  "Running in \"fillFromMC\" mode..." << std::endl; 
     for(const auto& genPart : *genPartsHandle){
       if((std::abs(genPart.pdgId())==11 || genPart.pdgId()==22) && genPart.statusFlags().isPrompt() && genPart.statusFlags().isFirstCopy()){
 	const reco::SuperCluster* sc = matchSC(genPart.eta(),genPart.phi(),scHandles);
@@ -347,22 +385,52 @@ const CaloParticle*  EGRegTreeMaker::matchCaloPart(const reco::GenParticle& genP
   return bestMatch;
 }
 
-const CaloParticle* EGRegTreeMaker::matchSCToCalo(const reco::SuperCluster* scToMatch,const std::vector<CaloParticle>& caloParts)
+const std::vector<reco::PFCluster> EGRegTreeMaker::getBestMatchedPFCluster(const std::vector<CaloParticle>& caloParts,const std::vector<reco::PFCluster>& pfClusters)
 {
-  const CaloParticle* bestMatch=nullptr;
-  double maxScore = -1.;
+  std::vector<reco::PFCluster> bestPFClusters;
+  bestPFClusters.resize(caloParts.size());
+ 
+  int iCalo=0;
   for(const auto& caloPart : caloParts){
-    std::vector<double> scores = getScores(scToMatch->seed(),&(*getHitsAndEnergiesCaloPart(&caloPart,-1.)));
-    if(scores[0]>maxScore && scores[0]>0.){
-       bestMatch = &caloPart;
-       maxScore = scores[0];
+    double maxScore = -1.;
+    std::vector<std::pair<DetId, float> > hitsAndEnergies = *getHitsAndEnergiesCaloPart(&caloPart,-1.);
+    for(const auto& pfCluster : pfClusters){
+      std::vector<double> scores = getScores(&pfCluster,&hitsAndEnergies);   
+      if(scores[0]>maxScore){
+         bestPFClusters[iCalo] = pfCluster;
+         maxScore = scores[0];
+      }
     }
+    iCalo++; 
   }
+  return bestPFClusters;
+}
+
+const reco::SuperCluster* EGRegTreeMaker::matchSCToCalo(const CaloParticle* caloToMatch,int iCalo,const std::vector<edm::Handle<reco::SuperClusterCollection> >& scHandles, std::vector<reco::PFCluster>* bestPFClusters)
+{
+  const reco::SuperCluster* bestMatch=nullptr;
+  std::vector<std::pair<DetId, float> > hitsAndEnergies = *getHitsAndEnergiesCaloPart(caloToMatch,-1.);
+  double maxScore = -1.;
+  for(const auto& scHandle : scHandles){
+      if(scHandle.isValid()){
+	for(const auto& sc: *scHandle){
+          std::vector<double> scores = getScores(sc.seed(),&hitsAndEnergies);  
+          bool sameCluster = reco::CaloCluster((*bestPFClusters)[iCalo])==*sc.seed();
+          if(scores[0]>maxScore && scores[0]>1e-2 && sameCluster){
+             bestMatch = &sc;
+             maxScore = scores[0];
+          }
+        }
+      }
+  }
+
+  if(bestMatch!=nullptr && !isInWindow(caloToMatch->eta(),caloToMatch->phi(),bestMatch->seed()->eta(),bestMatch->seed()->phi())) return nullptr;
   return bestMatch;  
 }
 
+
 //matched by seed det id which should be unique
-const reco::SuperCluster*  EGRegTreeMaker::matchSC(const reco::SuperCluster* scToMatch,const std::vector<edm::Handle<reco::SuperClusterCollection> >& scHandles)
+const reco::SuperCluster* EGRegTreeMaker::matchSC(const reco::SuperCluster* scToMatch,const std::vector<edm::Handle<reco::SuperClusterCollection> >& scHandles)
 {
   if(scToMatch){
     auto seedId = scToMatch->seed()->seed().rawId();
@@ -462,6 +530,104 @@ std::vector<double> EGRegTreeMaker::getScores(const reco::CaloClusterPtr seed, c
         if(std::isnan(scores.at(iVar))) std::cout << "score = " << iVar << " ---> NAN " << std::endl; 
 
     return scores;
+}
+
+std::vector<double> EGRegTreeMaker::getScores(const reco::PFCluster* pfCluster, const std::vector<std::pair<DetId, float> > *hits_and_energies_CaloPart)
+{
+    std::vector<double> scores;
+    scores.resize(2);
+
+    double simFraction=0.; 
+    double simFraction_noHitsFraction=0.;
+    double simEnergy=0.;
+    double simEnergy_shared=0.;
+    double simEnergy_shared_noHitsFraction=0.;
+   
+    for(const std::pair<DetId, float>& hit_CaloPart : *hits_and_energies_CaloPart)
+        simEnergy+=hit_CaloPart.second;
+   
+    const std::vector<std::pair<DetId,float> > hitsAndFractions = pfCluster->hitsAndFractions();
+    for(const std::pair<DetId, float>& hit_CaloPart : *hits_and_energies_CaloPart){
+        for(const std::pair<DetId, float>& hit_Cluster : hitsAndFractions){     
+            if(hit_CaloPart.first.rawId() == hit_Cluster.first.rawId()){
+               simEnergy_shared+=hit_CaloPart.second*hit_Cluster.second;
+               simEnergy_shared_noHitsFraction+=hit_CaloPart.second;
+            } 
+        }
+    }
+
+    if(simEnergy>0.) simFraction_noHitsFraction = simEnergy_shared_noHitsFraction/simEnergy;
+    else simFraction_noHitsFraction = -1.; 
+
+    if(simEnergy>0.) simFraction = simEnergy_shared/simEnergy;
+    else simFraction = -1.;
+   
+    scores[0] = simFraction;
+    scores[1] = simFraction_noHitsFraction;
+    
+    for(unsigned iVar=0; iVar<scores.size(); iVar++)
+        if(std::isnan(scores.at(iVar))) std::cout << "score = " << iVar << " ---> NAN " << std::endl; 
+
+    return scores;
+}
+
+bool EGRegTreeMaker::isInWindow(double genEta,double genPhi,double seedEta,double seedPhi)
+{
+    //Iz computation
+    int genIz = 0;
+    if(abs(genEta)>1.479 && genEta>0.) genIz = 1;
+    if(abs(genEta)>1.479 && genEta<0.) genIz = -1;
+    
+    int seedIz = 0;
+    if(abs(seedEta)>1.479 && seedEta>0.) seedIz = 1;
+    if(abs(seedEta)>1.479 && seedEta<0.) seedIz = -1;
+
+    if(genIz != seedIz) return false;
+
+    //DeltaEta
+    double etaw = seedEta-genEta;
+    if(genEta<0.) etaw = -etaw; 
+    
+    //DeltaPhi
+    double phiw = deltaPhi(genPhi, seedPhi);
+
+    //Seed dynamic windows
+    std::array<double,3> deltas = dynamicWindow(seedEta);
+
+    if(etaw>=deltas[0] && etaw<=deltas[1] && abs(phiw)<=deltas[2]) return true;
+    else return false;
+}
+
+double EGRegTreeMaker::deltaPhi(double phi1, double phi2)
+{
+    double dphi = phi1 - phi2;
+    if(dphi > TMath::Pi()) dphi -= 2*TMath::Pi();
+    if(dphi < -TMath::Pi()) dphi += 2*TMath::Pi();
+    return dphi;
+}
+
+std::array<double,3> EGRegTreeMaker::dynamicWindow(double eta)
+{
+    double aeta = abs(eta);
+
+    double deta_up = 0.;
+    if(aeta >= 0 && aeta < 0.1) deta_up = 0.075;
+    if(aeta >= 0.1 && aeta < 1.3) deta_up = 0.0758929 -0.0178571* aeta + 0.0892857*(aeta*aeta); 
+    else if(aeta >= 1.3 && aeta < 1.7) deta_up = 0.2;
+    else if(aeta >=1.7 && aeta < 1.9) deta_up = 0.625 -0.25*aeta;
+    else if(aeta >= 1.9) deta_up = 0.15;
+
+    double deta_down = 0.;
+    if(aeta < 2.1) deta_down = -0.075;
+    else if(aeta >= 2.1 && aeta < 2.5) deta_down = -0.1875 *aeta + 0.31875;
+    else if(aeta >=2.5) deta_down = -0.15;
+    
+    double dphi = 0.;        
+    if(aeta < 1.9) dphi = 0.6;
+    else if(aeta >= 1.9 && aeta < 2.7) dphi = 1.075 -0.25 * aeta;
+    else if(aeta >= 2.7) dphi = 0.4;
+     
+    return std::array<double,3>{{deta_down,deta_up,dphi}};
 }
 
 void EGRegTreeMaker::endJob()

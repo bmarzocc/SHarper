@@ -150,12 +150,16 @@ process.es_prefer_tpgLinearization = cms.ESPrefer("PoolDBESSource","myTPGLineari
 
 process.load("SHarper.TrigNtup.rePFSuperCluster_cff")
 process.egRegTreeMaker = cms.EDAnalyzer("EGRegTreeMaker",
+                                        fillFromSC = cms.bool(False),
+                                        fillFromMC = cms.bool(False),
+                                        fillFromSIM = cms.bool(True),
                                         verticesTag = cms.InputTag("offlinePrimaryVertices"),
                                         rhoTag = cms.InputTag("fixedGridRhoFastjetAllTmp"),
                                         genPartsTag = cms.InputTag("genParticles"),
                                         caloPartsTag = cms.InputTag("signalCaloParticles"),
                                         puSumTag = cms.InputTag("addPileupInfo"),
                                      #   scTag = cms.VInputTag("particleFlowSuperClusterECAL:particleFlowSuperClusterECALBarrel","particleFlowSuperClusterECAL:particleFlowSuperClusterECALEndcapWithPreshower"),
+                                        pfClusTag = cms.InputTag("particleFlowClusterECAL"),
                                         scTag = cms.VInputTag("particleFlowEGamma",),
                                         scAltTag = cms.VInputTag("particleFlowSuperClusterECALNoThres:particleFlowSuperClusterECALBarrel","particleFlowSuperClusterECALNoThres:particleFlowSuperClusterECALEndcapWithPreshower"),
                                         ecalHitsEBTag = cms.InputTag("reducedEcalRecHitsEB"),

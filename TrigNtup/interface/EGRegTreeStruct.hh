@@ -109,10 +109,10 @@ struct GenInfoStruct {
 };
 
 struct SimInfoStruct {
-  float energy,genEnergy,pt,eta,phi,pdgId,status,dR;
-  static std::string contents(){return "energy/F:genEnergy:pt:eta:phi:pdgId:status:dR";}
-  float computeSimEnergy(const CaloParticle* caloPart);
-  void clear(){energy=genEnergy=pt=eta=phi=pdgId=status=dR=0;}
+  float energy,energyWithES,genEnergy,pt,eta,phi,pdgId,status,dR;
+  static std::string contents(){return "energy/F:energyWithES:genEnergy:pt:eta:phi:pdgId:status:dR";}
+  float computeSimEnergy(const CaloParticle* caloPart, bool withES);
+  void clear(){energy=energyWithES=genEnergy=pt=eta=phi=pdgId=status=dR=0;}
   void fill(const CaloParticle& caloPart, float iDR);
 };
 
