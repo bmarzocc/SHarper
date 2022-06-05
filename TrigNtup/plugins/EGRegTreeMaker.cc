@@ -278,6 +278,8 @@ void EGRegTreeMaker::analyze(const edm::Event& iEvent,const edm::EventSetup& iSe
 
   if(fillFromSC_){
     //std::cout <<  "Running in \"fillFromSC\" mode..." << std::endl; 
+
+    int iSC=0;
     for(const auto& scHandle : scHandles){
       for(const auto& sc: *scHandle){
 	const reco::GenParticle* genPart = genPartsHandle.isValid() ? matchGenPart(sc.eta(),sc.phi(),*genPartsHandle) : nullptr;
@@ -295,9 +297,10 @@ void EGRegTreeMaker::analyze(const edm::Event& iEvent,const edm::EventSetup& iSe
 			      *caloTopoHandle,
 			      *chanStatusHandle,
 			      &sc,genPart,caloPart,ele,pho,scAlt,
-			      altEles,altPhos);
+			      altEles,altPhos,iSC,fillFromSC_,fillFromSIM_,fillFromMC_);
 	  egRegTree_->Fill();
 	}
+        iSC++;
       }
     }
   }else if(fillFromSIM_){
@@ -322,13 +325,15 @@ void EGRegTreeMaker::analyze(const edm::Event& iEvent,const edm::EventSetup& iSe
 			    *caloTopoHandle,
 			    *chanStatusHandle,
 			    sc,genPart,&caloPart,ele,pho,scAlt,
-			    altEles,altPhos);
+			    altEles,altPhos,iCalo,fillFromSC_,fillFromSIM_,fillFromMC_);
 	egRegTree_->Fill();
       }
       iCalo++;
     }
   }else if(fillFromMC_){
     //std::cout <<  "Running in \"fillFromMC\" mode..." << std::endl; 
+
+    int iGen=0;
     for(const auto& genPart : *genPartsHandle){
       if((std::abs(genPart.pdgId())==11 || genPart.pdgId()==22) && genPart.statusFlags().isPrompt() && genPart.statusFlags().isFirstCopy()){
 	const reco::SuperCluster* sc = matchSC(genPart.eta(),genPart.phi(),scHandles);
@@ -346,9 +351,10 @@ void EGRegTreeMaker::analyze(const edm::Event& iEvent,const edm::EventSetup& iSe
 			    *caloTopoHandle,
 			    *chanStatusHandle,
 			    sc,&genPart,caloPart,ele,pho,scAlt,
-			    altEles,altPhos);
+			    altEles,altPhos,iGen,fillFromSC_,fillFromSIM_,fillFromMC_);
 	egRegTree_->Fill();
       }
+      iGen++;
     }
     
   } 

@@ -72,13 +72,13 @@ struct PhoStruct {
 };
 
 struct SuperClustStruct {
-  float rawEnergy,rawESEnergy,etaWidth,phiWidth,seedClusEnergy,numberOfClusters,numberOfSubClusters,clusterMaxDR,clusterMaxDRDPhi,clusterMaxDRDEta,clusterMaxDRRawEnergy,corrEnergy,scEta,scPhi,seedEta,seedPhi,dEtaSeedSC,dPhiSeedSC,isEB,iEtaOrX,iPhiOrY,iEtaMod5,iPhiMod2,iEtaMod20,iPhiMod20,etaGapCode,phiGapCode,nearbyChanStatus,corrEnergyAlt,rawEnergyAlt,nrClusAlt,scSinTheta,seedSinTheta;
-  static std::string contents(){return "rawEnergy/F:rawESEnergy:etaWidth:phiWidth:seedClusEnergy:numberOfClusters:numberOfSubClusters:clusterMaxDR:clusterMaxDRDPhi:clusterMaxDRDEta:clusterMaxDRRawEnergy:corrEnergy:scEta:scPhi:seedEta:seedPhi:dEtaSeedSC:dPhiSeedSC:isEB:iEtaOrX:iPhiOrY:iEtaMod5:iPhiMod2:iEtaMod20:iPhiMod20:etaGapCode:phiGapCode:nearbyChanStatus:corrEnergyAlt:rawEnergyAlt:nrClusAlt:scSinTheta:seedSinTheta";}
+  float index,rawEnergy,rawESEnergy,etaWidth,phiWidth,seedClusEnergy,numberOfClusters,numberOfSubClusters,clusterMaxDR,clusterMaxDRDPhi,clusterMaxDRDEta,clusterMaxDRRawEnergy,corrEnergy,scEta,scPhi,seedEta,seedPhi,dEtaSeedSC,dPhiSeedSC,isEB,iEtaOrX,iPhiOrY,iEtaMod5,iPhiMod2,iEtaMod20,iPhiMod20,etaGapCode,phiGapCode,nearbyChanStatus,corrEnergyAlt,rawEnergyAlt,nrClusAlt,scSinTheta,seedSinTheta;
+  static std::string contents(){return "index/F:rawEnergy:rawESEnergy:etaWidth:phiWidth:seedClusEnergy:numberOfClusters:numberOfSubClusters:clusterMaxDR:clusterMaxDRDPhi:clusterMaxDRDEta:clusterMaxDRRawEnergy:corrEnergy:scEta:scPhi:seedEta:seedPhi:dEtaSeedSC:dPhiSeedSC:isEB:iEtaOrX:iPhiOrY:iEtaMod5:iPhiMod2:iEtaMod20:iPhiMod20:etaGapCode:phiGapCode:nearbyChanStatus:corrEnergyAlt:rawEnergyAlt:nrClusAlt:scSinTheta:seedSinTheta";}
   void clear(){
-    rawEnergy=rawESEnergy=etaWidth=phiWidth=seedClusEnergy=numberOfClusters=numberOfSubClusters=clusterMaxDR=clusterMaxDRDPhi=clusterMaxDRDEta=clusterMaxDRRawEnergy=corrEnergy=scEta=scPhi=seedEta=seedPhi=dEtaSeedSC=dPhiSeedSC=isEB=iEtaOrX=iPhiOrY=iEtaMod5=iPhiMod2=iEtaMod20=iPhiMod20=etaGapCode=phiGapCode=nearbyChanStatus=corrEnergyAlt=rawEnergyAlt=nrClusAlt=scSinTheta=seedSinTheta=0.;
+    rawEnergy=rawESEnergy=etaWidth=phiWidth=seedClusEnergy=numberOfClusters=numberOfSubClusters=clusterMaxDR=clusterMaxDRDPhi=clusterMaxDRDEta=clusterMaxDRRawEnergy=corrEnergy=scEta=scPhi=seedEta=seedPhi=dEtaSeedSC=dPhiSeedSC=isEB=iEtaOrX=iPhiOrY=iEtaMod5=iPhiMod2=iEtaMod20=iPhiMod20=etaGapCode=phiGapCode=nearbyChanStatus=corrEnergyAlt=rawEnergyAlt=nrClusAlt=scSinTheta=seedSinTheta=0.;index=-1;
   }
 
-  void fill(const reco::SuperCluster& sc,const EcalChannelStatus& ecalChanStatus,const reco::SuperCluster* altSC);
+  void fill(const reco::SuperCluster& sc,const EcalChannelStatus& ecalChanStatus,const reco::SuperCluster* altSC, int ind);
 };
 
 struct ShowerShapeStruct {
@@ -102,18 +102,18 @@ struct EvtStruct {
 };
 
 struct GenInfoStruct {
-  float energy,pt,eta,phi,pdgId,status,dR;
-  static std::string contents(){return "energy/F:pt:eta:phi:pdgId:status:dR";}
-  void clear(){energy=pt=eta=phi=pdgId=status=dR=0;}
-  void fill(const reco::GenParticle& genPart, float iDR);
+  float index,energy,pt,eta,phi,pdgId,status,dR;
+  static std::string contents(){return "index/F:energy:pt:eta:phi:pdgId:status:dR";}
+  void clear(){energy=pt=eta=phi=pdgId=status=dR=0;index=-1;}
+  void fill(const reco::GenParticle& genPart, float iDR, int ind);
 };
 
 struct SimInfoStruct {
-  float energy,energyWithES,genEnergy,pt,eta,phi,pdgId,status,dR;
-  static std::string contents(){return "energy/F:energyWithES:genEnergy:pt:eta:phi:pdgId:status:dR";}
+  float index,energy,energyWithES,genEnergy,pt,eta,phi,pdgId,status,dR;
+  static std::string contents(){return "index/F:energy:energyWithES:genEnergy:pt:eta:phi:pdgId:status:dR";}
   float computeSimEnergy(const CaloParticle* caloPart, bool withES);
-  void clear(){energy=energyWithES=genEnergy=pt=eta=phi=pdgId=status=dR=0;}
-  void fill(const CaloParticle& caloPart, float iDR);
+  void clear(){energy=energyWithES=genEnergy=pt=eta=phi=pdgId=status=dR=0;index=-1;}
+  void fill(const CaloParticle& caloPart, float iDR, int ind);
 };
 
 struct EGRegTreeStruct {
@@ -142,7 +142,7 @@ struct EGRegTreeStruct {
   }
   void createBranches(TTree* tree);
   void setBranchAddresses(TTree* tree);
-  void fill(const edm::Event& event,int iNrVert,float iRho,float nrPUInt,float nrTruePUInt,const EcalRecHitCollection& ecalHitsEB,const EcalRecHitCollection& ecalHitsEE,const CaloTopology& topo,const EcalChannelStatus& ecalChanStatus,const reco::SuperCluster* iSC,const reco::GenParticle* iMC,const CaloParticle* iSIM,const reco::GsfElectron* iEle,const reco::Photon* iPho,const reco::SuperCluster* altSC,const std::vector<const reco::GsfElectron*>& altEles,const std::vector<const reco::Photon*>& altPhos );
+  void fill(const edm::Event& event,int iNrVert,float iRho,float nrPUInt,float nrTruePUInt,const EcalRecHitCollection& ecalHitsEB,const EcalRecHitCollection& ecalHitsEE,const CaloTopology& topo,const EcalChannelStatus& ecalChanStatus,const reco::SuperCluster* iSC,const reco::GenParticle* iMC,const CaloParticle* iSIM,const reco::GsfElectron* iEle,const reco::Photon* iPho,const reco::SuperCluster* altSC,const std::vector<const reco::GsfElectron*>& altEles,const std::vector<const reco::Photon*>& altPhos,int index,bool isFromSC,bool isFromSIM,bool isFromMC);
   void clear(){
     nrVert=0;
     rho=0.;

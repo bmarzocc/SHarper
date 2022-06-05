@@ -75,8 +75,9 @@ void EvtStruct::fill(const edm::Event& event)
   eventnr = event.id().event();
 }
 
-void GenInfoStruct::fill(const reco::GenParticle& genPart,float iDR)
+void GenInfoStruct::fill(const reco::GenParticle& genPart,float iDR, int ind)
 {
+  index = ind;
   energy = genPart.energy();
   pt = genPart.pt();
   eta = genPart.eta();
@@ -108,8 +109,9 @@ float SimInfoStruct::computeSimEnergy(const CaloParticle* caloPart, bool withES)
   return simEnergy;
 }
 
-void SimInfoStruct::fill(const CaloParticle& caloPart,float iDR)
+void SimInfoStruct::fill(const CaloParticle& caloPart,float iDR, int ind)
 {
+  index = ind;
   energy = computeSimEnergy(&caloPart,false);
   energyWithES = computeSimEnergy(&caloPart,true);
   genEnergy = caloPart.energy();
@@ -122,9 +124,16 @@ void SimInfoStruct::fill(const CaloParticle& caloPart,float iDR)
 }
 
 void EGRegTreeStruct::fill(const edm::Event& event,int iNrVert,float iRho,float iNrPUInt,float iNrPUIntTrue,
-			   const EcalRecHitCollection& ecalHitsEB,const EcalRecHitCollection& ecalHitsEE,const CaloTopology& topo,const EcalChannelStatus& ecalChanStatus,const reco::SuperCluster* iSC,const reco::GenParticle* iMC,const CaloParticle* iSIM,const reco::GsfElectron* iEle,const reco::Photon* iPho,const reco::SuperCluster* scAlt, const std::vector<const reco::GsfElectron*>& altEles,const std::vector<const reco::Photon*>& altPhos)
+			   const EcalRecHitCollection& ecalHitsEB,const EcalRecHitCollection& ecalHitsEE,const CaloTopology& topo,const EcalChannelStatus& ecalChanStatus,const reco::SuperCluster* iSC,const reco::GenParticle* iMC,const CaloParticle* iSIM,const reco::GsfElectron* iEle,const reco::Photon* iPho,const reco::SuperCluster* scAlt, const std::vector<const reco::GsfElectron*>& altEles,const std::vector<const reco::Photon*>& altPhos,int index,bool isFromSC,bool isFromSIM,bool isFromMC)
 {
   clear();
+
+  int genIndex = -1;
+  int simIndex = -1;
+  int scIndex = -1;
+  if(isFromMC) genIndex = index;
+  if(isFromSIM) simIndex = index;
+  if(isFromSC) scIndex = index;
 
   nrVert = iNrVert;
   rho = iRho;
@@ -132,7 +141,7 @@ void EGRegTreeStruct::fill(const edm::Event& event,int iNrVert,float iRho,float 
   nrPUIntTrue = iNrPUIntTrue;
   evt.fill(event);
   if(iSC){
-    sc.fill(*iSC,ecalChanStatus,scAlt);
+    sc.fill(*iSC,ecalChanStatus,scAlt,scIndex);
     ssFull.fill<true>(*iSC->seed(),ecalHitsEB,ecalHitsEE,topo);
     ssFrac.fill<false>(*iSC->seed(),ecalHitsEB,ecalHitsEE,topo);
     auto fillClus = [&iSC](ClustStruct& clus,size_t index){
@@ -149,8 +158,8 @@ void EGRegTreeStruct::fill(const edm::Event& event,int iNrVert,float iRho,float 
     fillClus(clus2,2);  
     fillClus(clus3,3);  
   }
-  if(iMC) mc.fill(*iMC, iSC ? std::sqrt(reco::deltaR2(iSC->eta(),iSC->phi(),iMC->eta(),iMC->phi())) : 999);
-  if(iSIM) sim.fill(*iSIM, iSC ? std::sqrt(reco::deltaR2(iSC->eta(),iSC->phi(),iSIM->eta(),iSIM->phi())) : 999); 
+  if(iMC) mc.fill(*iMC, iSC ? std::sqrt(reco::deltaR2(iSC->eta(),iSC->phi(),iMC->eta(),iMC->phi())) : 999, genIndex);
+  if(iSIM) sim.fill(*iSIM, iSC ? std::sqrt(reco::deltaR2(iSC->eta(),iSC->phi(),iSIM->eta(),iSIM->phi())) : 999, simIndex); 
   if(iEle){
     ele.fill(*iEle);
     eleSSFull.fill(iEle->full5x5_showerShape(),*iEle);
@@ -200,11 +209,12 @@ int getDeadCrysCode(const DetIdType& id,const EcalChannelStatus& ecalChanStatus)
   return crysCode;
 }
 
-void SuperClustStruct::fill(const reco::SuperCluster& sc,const EcalChannelStatus& ecalChanStatus,const reco::SuperCluster* altSC)
+void SuperClustStruct::fill(const reco::SuperCluster& sc,const EcalChannelStatus& ecalChanStatus,const reco::SuperCluster* altSC, int ind)
 {
   auto& seedClus = *sc.seed(); 
   isEB = seedClus.seed().subdetId()==EcalBarrel;
   
+  index = ind;
   rawEnergy = sc.rawEnergy();
   rawESEnergy = sc.preshowerEnergy();
   etaWidth = sc.etaWidth();

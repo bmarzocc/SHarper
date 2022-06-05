@@ -151,10 +151,33 @@ process.myTPGLinearization = cms.ESSource("PoolDBESSource",
 process.es_prefer_tpgLinearization = cms.ESPrefer("PoolDBESSource","myTPGLinearization")
 
 process.load("SHarper.TrigNtup.rePFSuperCluster_cff")
-process.egRegTreeMaker = cms.EDAnalyzer("EGRegTreeMaker",
+process.egRegTreeMakerSim = cms.EDAnalyzer("EGRegTreeMaker",
+                                        treeName = cms.string("egRegTree_caloMatched"),
                                         fillFromSC = cms.bool(False),
                                         fillFromMC = cms.bool(False),
-                                        fillFromSIM = cms.bool(True),
+                                        fillFromSIM = cms.bool(True),    
+                                        verticesTag = cms.InputTag("offlinePrimaryVertices"),
+                                        rhoTag = cms.InputTag("fixedGridRhoFastjetAllTmp"),
+                                        genPartsTag = cms.InputTag("genParticles"),
+				        caloPartsTag = cms.InputTag("signalCaloParticles"),
+                                        puSumTag = cms.InputTag("addPileupInfo"),
+                                     #   scTag = cms.VInputTag("particleFlowSuperClusterECAL:particleFlowSuperClusterECALBarrel","particleFlowSuperClusterECAL:particleFlowSuperClusterECALEndcapWithPreshower"),
+                                        pfClusTag = cms.InputTag("particleFlowClusterECAL"),
+                                        scTag = cms.VInputTag("particleFlowEGamma",),
+                                        scAltTag = cms.VInputTag("particleFlowSuperClusterECALNoThres:particleFlowSuperClusterECALBarrel","particleFlowSuperClusterECALNoThres:particleFlowSuperClusterECALEndcapWithPreshower"),
+                                        ecalHitsEBTag = cms.InputTag("reducedEcalRecHitsEB"),
+                                        ecalHitsEETag = cms.InputTag("reducedEcalRecHitsEE"),
+                                        elesTag = cms.InputTag("gedGsfElectrons"),
+                                        phosTag = cms.InputTag("gedPhotons"),
+                                        elesAltTag = cms.VInputTag(),
+                                        phosAltTag = cms.VInputTag(),
+                                        )
+
+process.egRegTreeMakerGen = cms.EDAnalyzer("EGRegTreeMaker",
+                                        treeName = cms.string("egRegTree_genMatched"),
+                                        fillFromSC = cms.bool(False),
+                                        fillFromMC = cms.bool(True),
+                                        fillFromSIM = cms.bool(False),    
                                         verticesTag = cms.InputTag("offlinePrimaryVertices"),
                                         rhoTag = cms.InputTag("fixedGridRhoFastjetAllTmp"),
                                         genPartsTag = cms.InputTag("genParticles"),
@@ -179,7 +202,7 @@ process.TFileService = cms.Service("TFileService",
                                    #fileName = cms.string(options.outputFile)
                                    fileName = cms.string('egmRegTree.root')
 )
-process.egmReg_step = cms.Path(process.rePFSuperClusterThresSeq*process.egRegTreeMaker)
+process.egmReg_step = cms.Path(process.rePFSuperClusterThresSeq*process.egRegTreeMakerSim*process.egRegTreeMakerGen)
 
 # Path and EndPath definitions
 process.raw2digi_step = cms.Path(process.RawToDigi)
