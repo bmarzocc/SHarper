@@ -118,16 +118,16 @@ muonSimClassificationByHitsTask.remove(muonSimClassifier)
 from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, '123X_mcRun3_2021_realistic_v11', '')
 
-#process.myICs = cms.ESSource("PoolDBESSource",
-#     connect = cms.string("frontier://FrontierProd/CMS_CONDITIONS"),
-#     toGet = cms.VPSet(
-#         cms.PSet(
-#             record = cms.string('EcalIntercalibConstantsRcd'),
-#             tag = cms.string('EcalIntercalibConstants_MC_Digi_2018')
-#         )
-#     )
-#)
-#process.es_prefer_icReco = cms.ESPrefer("PoolDBESSource","myICs")
+process.myICs = cms.ESSource("PoolDBESSource",
+     connect = cms.string("frontier://FrontierProd/CMS_CONDITIONS"),
+     toGet = cms.VPSet(
+         cms.PSet(
+             record = cms.string('EcalIntercalibConstantsRcd'),
+             tag = cms.string('EcalIntercalibConstants_MC_Digi_2018')
+         )
+     )
+)
+process.es_prefer_icReco = cms.ESPrefer("PoolDBESSource","myICs")
 
 process.myPFRechitThres = cms.ESSource("PoolDBESSource",
      connect = cms.string("frontier://FrontierProd/CMS_CONDITIONS"),

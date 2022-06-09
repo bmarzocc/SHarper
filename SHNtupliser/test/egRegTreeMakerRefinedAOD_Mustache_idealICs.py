@@ -2,7 +2,7 @@
 # using: 
 # Revision: 1.19 
 # Source: /local/reps/CMSSW/CMSSW/Configuration/Applications/python/ConfigBuilder.py,v 
-# with command line options: --python_filename step3_RECO_Mustache_cfg.py --eventcontent RECOSIM --datatier GEN-SIM-RECO --fileout file:step3.root --conditions 123X_mcRun3_2021_realistic_v11 --step RAW2DIGI,L1Reco,RECO,RECOSIM,PAT --geometry DB:Extended --filein file:step2.root --era Run3,ctpps_2018 --no_exec --mc --procModifier ecal_deepsc
+# with command line options: --python_filename step3_RECO_Mustache_cfg.py --eventcontent RECOSIM --datatier GEN-SIM-RECO --fileout file:step3.root --conditions 123X_mcRun3_2021_realistic_v11 --step RAW2DIGI,L1Reco,RECO,RECOSIM,PAT --geometry DB:Extended --filein file:step2.root --era Run3,ctpps_2018 --no_exec --mc
 import FWCore.ParameterSet.Config as cms
 import FWCore.Utilities.FileUtils as FileUtils
 import FWCore.ParameterSet.VarParsing as VarParsing
@@ -21,12 +21,10 @@ options.register('outputFile',
                 
 options.parseArguments()
 
-
 from Configuration.Eras.Era_Run3_cff import Run3
 from Configuration.Eras.Modifier_ctpps_2018_cff import ctpps_2018
-from Configuration.ProcessModifiers.ecal_deepsc_cff import ecal_deepsc
 
-process = cms.Process('RECO',Run3,ctpps_2018,ecal_deepsc)
+process = cms.Process('RECO',Run3,ctpps_2018)
 
 # import of standard configurations
 process.load('Configuration.StandardSequences.Services_cff')
@@ -118,16 +116,16 @@ muonSimClassificationByHitsTask.remove(muonSimClassifier)
 from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, '123X_mcRun3_2021_realistic_v11', '')
 
-#process.myICs = cms.ESSource("PoolDBESSource",
-#     connect = cms.string("frontier://FrontierProd/CMS_CONDITIONS"),
-#     toGet = cms.VPSet(
-#         cms.PSet(
-#             record = cms.string('EcalIntercalibConstantsRcd'),
-#             tag = cms.string('EcalIntercalibConstants_MC_Digi_2018')
-#         )
-#     )
-#)
-#process.es_prefer_icReco = cms.ESPrefer("PoolDBESSource","myICs")
+process.myICs = cms.ESSource("PoolDBESSource",
+     connect = cms.string("frontier://FrontierProd/CMS_CONDITIONS"),
+     toGet = cms.VPSet(
+         cms.PSet(
+             record = cms.string('EcalIntercalibConstantsRcd'),
+             tag = cms.string('EcalIntercalibConstants_MC_Digi_2018')
+         )
+     )
+)
+process.es_prefer_icReco = cms.ESPrefer("PoolDBESSource","myICs")
 
 process.myPFRechitThres = cms.ESSource("PoolDBESSource",
      connect = cms.string("frontier://FrontierProd/CMS_CONDITIONS"),
@@ -241,9 +239,6 @@ process.Flag_trkPOG_manystripclus53X = cms.Path(~process.manystripclus53X)
 process.Flag_trkPOG_toomanystripclus53X = cms.Path(~process.toomanystripclus53X)
 process.endjob_step = cms.EndPath(process.endOfProcess)
 process.RECOSIMoutput_step = cms.EndPath(process.RECOSIMoutput)
-
-#Set DeepSC strategy
-process.particleFlowSuperClusterECAL.deepSuperClusterConfig.collectionStrategy =  'CollectAndMerge'
 
 # Schedule definition
 process.schedule = cms.Schedule(process.raw2digi_step,process.L1Reco_step,process.reconstruction_step,process.recosim_step,process.Flag_HBHENoiseFilter,process.Flag_HBHENoiseIsoFilter,process.Flag_CSCTightHaloFilter,process.Flag_CSCTightHaloTrkMuUnvetoFilter,process.Flag_CSCTightHalo2015Filter,process.Flag_globalTightHalo2016Filter,process.Flag_globalSuperTightHalo2016Filter,process.Flag_HcalStripHaloFilter,process.Flag_hcalLaserEventFilter,process.Flag_EcalDeadCellTriggerPrimitiveFilter,process.Flag_EcalDeadCellBoundaryEnergyFilter,process.Flag_ecalBadCalibFilter,process.Flag_goodVertices,process.Flag_eeBadScFilter,process.Flag_ecalLaserCorrFilter,process.Flag_trkPOGFilters,process.Flag_chargedHadronTrackResolutionFilter,process.Flag_muonBadTrackFilter,process.Flag_BadChargedCandidateFilter,process.Flag_BadPFMuonFilter,process.Flag_BadPFMuonDzFilter,process.Flag_hfNoisyHitsFilter,process.Flag_BadChargedCandidateSummer16Filter,process.Flag_BadPFMuonSummer16Filter,process.Flag_trkPOG_manystripclus53X,process.Flag_trkPOG_toomanystripclus53X,process.Flag_trkPOG_logErrorTooManyClusters,process.Flag_METFilters,process.egmReg_step,process.endjob_step)

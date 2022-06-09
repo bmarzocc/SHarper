@@ -7,7 +7,7 @@ from WMCore.Configuration import Configuration
 config = Configuration()
 
 config.section_('General')
-config.General.requestName       = 'FourGammasGunPt1-100_DeepSC_algoB'
+config.General.requestName       = 'FourElectronsGunPt1-100_DeepSC_algoB'
 config.General.transferLogs      = True
 config.General.transferOutputs   = True
 
@@ -22,8 +22,8 @@ config.JobType.numCores          = 2
 
 config.section_('Data')
 # This string determines the primary dataset of the newly-produced outputs.
-#config.Data.inputDataset         = '/FourElectronsGunPt1-100_pythia8_StdMix_Flat55To75_14TeV_112X_mcRun3_2021_realistic_v15/dpg_ecal-GEN-SIM-RAW-Reduced-f73d3671898879ae5e675fcbfe8fb906/USER'
-config.Data.inputDataset         = '/FourGammasGunPt1-100_pythia8_StdMix_Flat55To75_14TeV_112X_mcRun3_2021_realistic_v15/dpg_ecal-GEN-SIM-RAW-Reduced-f73d3671898879ae5e675fcbfe8fb906/USER'
+config.Data.inputDataset         = '/FourElectronsGunPt1-100_pythia8_StdMix_Flat55To75_14TeV_112X_mcRun3_2021_realistic_v15/dpg_ecal-GEN-SIM-RAW-Reduced-f73d3671898879ae5e675fcbfe8fb906/USER'
+#config.Data.inputDataset         = '/FourGammasGunPt1-100_pythia8_StdMix_Flat55To75_14TeV_112X_mcRun3_2021_realistic_v15/dpg_ecal-GEN-SIM-RAW-Reduced-f73d3671898879ae5e675fcbfe8fb906/USER'
 config.JobType.outputFiles       = ["egmRegTree.root"]
 config.Data.inputDBS             = 'global'   
 config.Data.inputDBS             = 'phys03'   

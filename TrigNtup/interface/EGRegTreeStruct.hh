@@ -72,10 +72,10 @@ struct PhoStruct {
 };
 
 struct SuperClustStruct {
-  float index,rawEnergy,rawESEnergy,etaWidth,phiWidth,seedClusEnergy,numberOfClusters,numberOfSubClusters,clusterMaxDR,clusterMaxDRDPhi,clusterMaxDRDEta,clusterMaxDRRawEnergy,corrEnergy,scEta,scPhi,seedEta,seedPhi,dEtaSeedSC,dPhiSeedSC,isEB,iEtaOrX,iPhiOrY,iEtaMod5,iPhiMod2,iEtaMod20,iPhiMod20,etaGapCode,phiGapCode,nearbyChanStatus,corrEnergyAlt,rawEnergyAlt,nrClusAlt,scSinTheta,seedSinTheta;
-  static std::string contents(){return "index/F:rawEnergy:rawESEnergy:etaWidth:phiWidth:seedClusEnergy:numberOfClusters:numberOfSubClusters:clusterMaxDR:clusterMaxDRDPhi:clusterMaxDRDEta:clusterMaxDRRawEnergy:corrEnergy:scEta:scPhi:seedEta:seedPhi:dEtaSeedSC:dPhiSeedSC:isEB:iEtaOrX:iPhiOrY:iEtaMod5:iPhiMod2:iEtaMod20:iPhiMod20:etaGapCode:phiGapCode:nearbyChanStatus:corrEnergyAlt:rawEnergyAlt:nrClusAlt:scSinTheta:seedSinTheta";}
+  float index,rawEnergy,rawESEnergy,et,etaWidth,phiWidth,seedClusEnergy,numberOfClusters,numberOfSubClusters,clusterMaxDR,clusterMaxDRDPhi,clusterMaxDRDEta,clusterMaxDRRawEnergy,corrEnergy,scEta,scPhi,seedEta,seedPhi,dEtaSeedSC,dPhiSeedSC,isEB,iEtaOrX,iPhiOrY,iEtaMod5,iPhiMod2,iEtaMod20,iPhiMod20,etaGapCode,phiGapCode,nearbyChanStatus,corrEnergyAlt,rawEnergyAlt,nrClusAlt,scSinTheta,seedSinTheta;
+  static std::string contents(){return "index/F:rawEnergy:rawESEnergy:et:etaWidth:phiWidth:seedClusEnergy:numberOfClusters:numberOfSubClusters:clusterMaxDR:clusterMaxDRDPhi:clusterMaxDRDEta:clusterMaxDRRawEnergy:corrEnergy:scEta:scPhi:seedEta:seedPhi:dEtaSeedSC:dPhiSeedSC:isEB:iEtaOrX:iPhiOrY:iEtaMod5:iPhiMod2:iEtaMod20:iPhiMod20:etaGapCode:phiGapCode:nearbyChanStatus:corrEnergyAlt:rawEnergyAlt:nrClusAlt:scSinTheta:seedSinTheta";}
   void clear(){
-    rawEnergy=rawESEnergy=etaWidth=phiWidth=seedClusEnergy=numberOfClusters=numberOfSubClusters=clusterMaxDR=clusterMaxDRDPhi=clusterMaxDRDEta=clusterMaxDRRawEnergy=corrEnergy=scEta=scPhi=seedEta=seedPhi=dEtaSeedSC=dPhiSeedSC=isEB=iEtaOrX=iPhiOrY=iEtaMod5=iPhiMod2=iEtaMod20=iPhiMod20=etaGapCode=phiGapCode=nearbyChanStatus=corrEnergyAlt=rawEnergyAlt=nrClusAlt=scSinTheta=seedSinTheta=0.;index=-1;
+    rawEnergy=rawESEnergy=et=etaWidth=phiWidth=seedClusEnergy=numberOfClusters=numberOfSubClusters=clusterMaxDR=clusterMaxDRDPhi=clusterMaxDRDEta=clusterMaxDRRawEnergy=corrEnergy=scEta=scPhi=seedEta=seedPhi=dEtaSeedSC=dPhiSeedSC=isEB=iEtaOrX=iPhiOrY=iEtaMod5=iPhiMod2=iEtaMod20=iPhiMod20=etaGapCode=phiGapCode=nearbyChanStatus=corrEnergyAlt=rawEnergyAlt=nrClusAlt=scSinTheta=seedSinTheta=0.;index=-1;
   }
 
   void fill(const reco::SuperCluster& sc,const EcalChannelStatus& ecalChanStatus,const reco::SuperCluster* altSC, int ind);

@@ -77,7 +77,7 @@ void EvtStruct::fill(const edm::Event& event)
 
 void GenInfoStruct::fill(const reco::GenParticle& genPart,float iDR, int ind)
 {
-  index = ind;
+  index = (float)ind;
   energy = genPart.energy();
   pt = genPart.pt();
   eta = genPart.eta();
@@ -111,7 +111,7 @@ float SimInfoStruct::computeSimEnergy(const CaloParticle* caloPart, bool withES)
 
 void SimInfoStruct::fill(const CaloParticle& caloPart,float iDR, int ind)
 {
-  index = ind;
+  index = (float)ind;
   energy = computeSimEnergy(&caloPart,false);
   energyWithES = computeSimEnergy(&caloPart,true);
   genEnergy = caloPart.energy();
@@ -214,9 +214,10 @@ void SuperClustStruct::fill(const reco::SuperCluster& sc,const EcalChannelStatus
   auto& seedClus = *sc.seed(); 
   isEB = seedClus.seed().subdetId()==EcalBarrel;
   
-  index = ind;
+  index = (float)ind;
   rawEnergy = sc.rawEnergy();
   rawESEnergy = sc.preshowerEnergy();
+  et = sc.rawEnergy()/TMath::CosH(sc.eta());
   etaWidth = sc.etaWidth();
   phiWidth = sc.phiWidth();
   seedClusEnergy = seedClus.energy();
