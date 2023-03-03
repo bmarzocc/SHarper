@@ -51,7 +51,7 @@ void TrigCrossSecMaker::analyze(const edm::Event& iEvent, const edm::EventSetup&
   //if(lumiSec>=314 && lumiSec<=341) return; //temp skip for bad lumi
   
   size_t pathIndex = trigNames.triggerIndex(pathName_);
-  int preScale = !selectingPathName_.empty() ? hltConfig_.prescaleValue(iEvent,iSetup,selectingPathName_) : 1;
+  double preScale = !selectingPathName_.empty() ? hltConfig_.prescaleValue<double>(iEvent,iSetup,selectingPathName_) : 1;
   //std::cout <<"prescale "<<preScale<<std::endl;
   if(pathIndex<trigResults.size() && trigResults.accept(pathIndex)){
     trigCrossSecData_.fill(runnr,lumiSec,preScale);
@@ -123,7 +123,7 @@ void TrigCrossSecMaker::TrigCrossSecData::addLumiSecData(const std::string& file
   std::sort(lumiSecData_.begin(),lumiSecData_.end());
 
 }
-void TrigCrossSecMaker::TrigCrossSecData::fill(int runnr,int lumiSec,int nrEvents)
+void TrigCrossSecMaker::TrigCrossSecData::fill(int runnr,int lumiSec,double nrEvents)
 {
   //I'm going to be lazy and do in a badly designed way
   //what I should to is to do it off std::pair<runnr,lumi> but I cant be bothered

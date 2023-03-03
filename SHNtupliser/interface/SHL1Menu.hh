@@ -19,11 +19,11 @@ public:
   private:
     size_t bitNr_;
     std::string name_;
-    std::vector<unsigned int> preScales_;
+    std::vector<double> preScales_;
     bool masked_;
   public:
     Seed():bitNr_(std::numeric_limits<size_t>::max()),masked_(true){}
-    Seed(size_t iBitNr,std::string iName,std::vector<unsigned int> iPreScales,bool iMasked):
+    Seed(size_t iBitNr,std::string iName,std::vector<double> iPreScales,bool iMasked):
       bitNr_(iBitNr),name_(std::move(iName)),
       preScales_(std::move(iPreScales)),masked_(iMasked){}
 

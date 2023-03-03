@@ -75,7 +75,7 @@ private:
     TrigCrossSecData(const std::string& filename){addLumiSecData(filename);}
 
     void addLumiSecData(const std::string& filename);
-    void fill(int runnr,int lumiSec,int nrEvents);
+    void fill(int runnr,int lumiSec,double nrEvents);
     
     size_t nrLumiSecs(){return lumiSecData_.size();}
     const LumiSecData& lumiSec(size_t lumiSecIndex){return lumiSecData_[lumiSecIndex];}

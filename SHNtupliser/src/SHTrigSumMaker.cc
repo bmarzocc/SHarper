@@ -1,4 +1,3 @@
-
 #include "SHarper/SHNtupliser/interface/SHTrigSumMaker.h"
 #include "SHarper/SHNtupliser/interface/LogErr.hh"
 #include "SHarper/SHNtupliser/interface/SHTrigSummary.hh"
@@ -273,15 +272,15 @@ void SHTrigSumMaker::addHLTMenu_(const HLTConfigProvider& hltConfig)
 			
 {  
   std::vector<SHHLTMenu::Path> hltPaths;
-  std::vector<unsigned int> defaultPSes(hltConfig.prescaleSize(),1);
+  std::vector<double> defaultPSes(hltConfig.prescaleSize(),1);
   for(size_t pathNr=0;pathNr<hltConfig.triggerNames().size();pathNr++){
     const std::string& trigName  = hltConfig.triggerNames()[pathNr];
 
     std::vector<std::string> l1Seeds = getL1Seeds_(hltConfig,pathNr,trigName);
     if(l1Seeds.size()>kMaxNrL1SeedsToStore_) l1Seeds.clear();
     
-    auto psTblEntry = hltConfig.prescaleTable().find(trigName);
-    const std::vector<unsigned int>& preScales = psTblEntry!=hltConfig.prescaleTable().end() ? 
+    auto psTblEntry = hltConfig.prescaleTable<double>().find(trigName);
+    const std::vector<double>& preScales = psTblEntry!=hltConfig.prescaleTable<double>().end() ? 
       psTblEntry->second : defaultPSes;
     
     hltPaths.emplace_back(SHHLTMenu::Path(pathNr,rmTrigVersionFromName(trigName),
@@ -317,7 +316,7 @@ void SHTrigSumMaker::addL1Menu_(const HLTConfigProvider& hltConfig,
   //because L1TGlobalUtil is garbage and broken
   l1t::L1TGlobalUtil& l1GtUtils = const_cast<l1t::L1TGlobalUtil&>(l1GtUtilsConst);
 
-  std::vector<unsigned int> defaultPSes(hltConfig.prescaleSize(),1);
+  std::vector<double> defaultPSes(hltConfig.prescaleSize(),1);
   for(size_t bitNr=0;bitNr<l1GtUtils.decisionsFinal().size();bitNr++){
     const std::string& l1Name = l1GtUtils.decisionsFinal()[bitNr].first;
     seeds.emplace_back(SHL1Menu::Seed(bitNr,l1Name,defaultPSes,false));
@@ -372,7 +371,7 @@ void SHTrigSumMaker::addL1Menu_(const edm::EventSetup& edmEventSetup,
     }
   }else{
     for(size_t bitNr=0;bitNr<l1Names.size();bitNr++){
-      seeds.emplace_back(SHL1Menu::Seed(bitNr,l1Names[bitNr],std::vector<unsigned int>(),false));
+      seeds.emplace_back(SHL1Menu::Seed(bitNr,l1Names[bitNr],std::vector<double>(),false));
     }
   }
 
@@ -545,10 +544,10 @@ std::vector<std::string> SHTrigSumMaker::splitL1SeedExpr_(const std::string& l1S
 
 
 //converts vector[columnNr][bitNr] -> vector[columnNr] for a given bitNr 
-std::vector<unsigned int> 
+std::vector<double> 
 SHTrigSumMaker::getSeedPreScales(size_t bitNr,const std::vector<std::vector<int> >& psTbl)
 {
-  if(psTbl.empty()) return std::vector<unsigned int>();
+  if(psTbl.empty()) return std::vector<double>();
 
   bool badTbl=false;
   for(size_t colNr=1;colNr<psTbl.size() && !badTbl;colNr++){
@@ -561,9 +560,9 @@ SHTrigSumMaker::getSeedPreScales(size_t bitNr,const std::vector<std::vector<int>
     std::cout <<std::endl;
   }
 
-  if(badTbl || bitNr>=psTbl[0].size()) return std::vector<unsigned int>(psTbl.size(),1);
+  if(badTbl || bitNr>=psTbl[0].size()) return std::vector<double>(psTbl.size(),1);
   else {
-    std::vector<unsigned int> preScales;
+    std::vector<double> preScales;
     for(size_t colNr=0;colNr<psTbl.size();colNr++){
       preScales.push_back(psTbl[colNr][bitNr]);
     }

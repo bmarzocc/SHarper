@@ -166,7 +166,7 @@ private:
 
   static std::vector<std::string> splitL1SeedExpr_(const std::string& l1SeedExpr);
   //converts vector[columnNr][bitNr] -> vector[columnNr] for a given bitNr 
-  static std::vector<unsigned int> getSeedPreScales(size_t bitNr,const std::vector<std::vector<int> >& psTbl);
+  static std::vector<double> getSeedPreScales(size_t bitNr,const std::vector<std::vector<int> >& psTbl);
 
   edm::ESGetToken<L1TUtmTriggerMenu, L1TUtmTriggerMenuRcd> l1tMenuToken_;
   edm::ESGetToken<L1TGlobalPrescalesVetos, L1TGlobalPrescalesVetosRcd> l1tGtPrescalesVetosToken_;

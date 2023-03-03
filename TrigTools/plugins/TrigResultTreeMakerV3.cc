@@ -169,7 +169,7 @@ void TrigCounts::fill(const RunLumiKey& key,const edm::TriggerNames& trigNames,
 {
   const int psColumn=0;
   
-  std::vector<unsigned int> defaultPSes(hltConfig.prescaleSize(),1);
+  std::vector<double> defaultPSes(hltConfig.prescaleSize(),1);
 
   auto& countsData = data_.insert({key,TrigCountsData(pathNames_.size())}).first->second;
 
@@ -177,10 +177,10 @@ void TrigCounts::fill(const RunLumiKey& key,const edm::TriggerNames& trigNames,
     size_t pathIndex = trigNames.triggerIndex(pathNames_[pathNr]);
     if(pathIndex<trigResults.size() &&  trigResults.accept(pathIndex)){
 	
-      auto psTblEntry = hltConfig.prescaleTable().find(pathNames_[pathNr]);
-      const std::vector<unsigned int>& preScales = psTblEntry!=hltConfig.prescaleTable().end() ? 
+      auto psTblEntry = hltConfig.prescaleTable<double>().find(pathNames_[pathNr]);
+      const std::vector<double>& preScales = psTblEntry!=hltConfig.prescaleTable<double>().end() ? 
 	psTblEntry->second : defaultPSes;
-      int preScale=1;
+      double preScale=1;
       if(static_cast<size_t>(psColumn)<preScales.size()) preScale = preScales[psColumn];
       //	else std::cout <<"for path "<<pathNames_[pathNr]<<" column "<<psColumn<<" higher than number of ps columns "<<preScales.size();
       

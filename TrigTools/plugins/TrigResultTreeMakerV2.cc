@@ -57,8 +57,8 @@ private:
   trigtools::EvtInfoStruct evtInfo_;
   std::vector<unsigned int> trigBits_;
   std::vector<unsigned int> trigBitsP5_;
-  std::vector<int> trigWeights_;
-  std::vector<int> trigWeightsP5_;
+  std::vector<double> trigWeights_;
+  std::vector<double> trigWeightsP5_;
   int psColumn_;
   int hltPhysicsPS_;
   std::string refTrigger_;
@@ -145,19 +145,19 @@ void TrigResultTreeMakerV2::beginRun(const edm::Run& run,const edm::EventSetup& 
 namespace {
   void fillTrigInfo(const std::vector<std::string>& pathNames,const edm::TriggerNames& trigNames,
 		    const edm::TriggerResults& trigResults,const HLTConfigProvider& hltConfig,int psColumn,
-		    std::vector<unsigned int>& trigBits,std::vector<int>& trigWeights,const unsigned int wordSize)
+		    std::vector<unsigned int>& trigBits,std::vector<double>& trigWeights,const unsigned int wordSize)
   {
-    std::vector<unsigned int> defaultPSes(hltConfig.prescaleSize(),1);
+    std::vector<double> defaultPSes(hltConfig.prescaleSize(),1);
     std::fill(trigBits.begin(),trigBits.end(),0);
     std::fill(trigWeights.begin(),trigWeights.end(),0);
     for(size_t pathNr=0;pathNr<pathNames.size();pathNr++){
       size_t pathIndex = trigNames.triggerIndex(pathNames[pathNr]);
       if(pathIndex<trigResults.size() &&  trigResults.accept(pathIndex)){
 	
-	auto psTblEntry = hltConfig.prescaleTable().find(pathNames[pathNr]);
-	const std::vector<unsigned int>& preScales = psTblEntry!=hltConfig.prescaleTable().end() ? 
+	auto psTblEntry = hltConfig.prescaleTable<double>().find(pathNames[pathNr]);
+	const std::vector<double>& preScales = psTblEntry!=hltConfig.prescaleTable<double>().end() ? 
 	  psTblEntry->second : defaultPSes;
-	int preScale=1;
+	double preScale=1;
 	if(static_cast<size_t>(psColumn)<preScales.size()) preScale = preScales[psColumn];
 	//	else std::cout <<"for path "<<pathNames[pathNr]<<" column "<<psColumn<<" higher than number of ps columns "<<preScales.size();
 	if(pathNr<trigWeights.size()) trigWeights[pathNr]=preScale;
